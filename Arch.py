@@ -6,7 +6,7 @@ class EmotionEngine(Architecture):
     name             = "EmotionEngine"
     address_size     = 4
     default_int_size = 4
-    instr_alignment  = 1
+    instr_alignment  = 4
 
     regs = {
         'zero': RegisterInfo('zero', 16),
@@ -48,9 +48,9 @@ class EmotionEngine(Architecture):
 
     def get_instruction_info(self, data, addr):
         result = InstructionInfo()
-        result.lenth = 1
+        result.length = 4
         return result
     
     def get_instruction_text(self, data, addr):
         tokens = [InstructionTextToken(InstructionTextTokenType.TextToken, "Hello")]
-        return tokens, 1
+        return tokens, 4
