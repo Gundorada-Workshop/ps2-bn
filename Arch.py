@@ -10,6 +10,7 @@ class EmotionEngine(Architecture):
     address_size     = 4
     default_int_size = 4
     instr_alignment  = 4
+    max_instr_length = 8 # Branch + Branch delay slot
 
     gpr = {
         0: "$zero",
@@ -55,6 +56,7 @@ class EmotionEngine(Architecture):
     class InstructionType(Enum):
         UNDEFINED = auto()
         GenericInt = auto()
+        Branch = auto()
 
     class Instruction:
         type: EmotionEngine.InstructionType
@@ -129,12 +131,12 @@ class EmotionEngine(Architecture):
                 instruction.source2 = (opcode >> 21) & 0x1F
             case 0x08:
                 # jr
-                instruction.type = IT.GenericInt # TODO: Different instruction type
+                instruction.type = IT.Branch
                 instruction.name = "jr"
                 instruction.dest = (opcode >> 21) & 0x1F
             case 0x09:
                 # jalr
-                instruction.type = IT.GenericInt # TODO: Different instruction type
+                instruction.type = IT.Branch
                 instruction.name = "jalr"
                 instruction.dest = (opcode >> 21) & 0x1F
             case 0x0A:
@@ -399,8 +401,25 @@ class EmotionEngine(Architecture):
                 return instruction
 
     def get_instruction_info(self, data: bytes, addr: int):
+        if len(data) < 4:
+            return None
+
+        instruction = self.decode(data[0:4], addr)
+        IT = EmotionEngine.InstructionType
+
         result = InstructionInfo()
         result.length = 4
+
+        if instruction.type == IT.Branch:
+            result.branch_delay = 1
+            match instruction.name:
+                case "jr":
+                    if EmotionEngine.gpr[instruction.dest] == EmotionEngine.link_register:
+                        result.add_branch(BranchType.FunctionReturn)
+                    else:
+                        result.add_branch(BranchType.IndirectBranch)
+                # TODO other branches
+
         return result
     
     def get_instruction_text(self, data: bytes, addr: int):
@@ -413,12 +432,12 @@ class EmotionEngine(Architecture):
 
         if instruction.type == IT.UNDEFINED:
             return None
+        
+        tokens.append(InstructionTextToken(InstructionTextTokenType.InstructionToken, f"{instruction.name:7s} "))
 
         match instruction.type:
             case IT.GenericInt:
-                tokens.append(InstructionTextToken(InstructionTextTokenType.InstructionToken, instruction.name))
                 if instruction.dest is not None:
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.TextToken, " "))
                     tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, EmotionEngine.gpr[instruction.dest]))
                 if instruction.source1 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
@@ -429,5 +448,10 @@ class EmotionEngine(Architecture):
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
                     tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str(instruction.operand)))
+            case IT.Branch:
+                if instruction.dest is not None:
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, EmotionEngine.gpr[instruction.dest]))
+                if instruction.operand is not None:
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, str(instruction.operand)))
 
         return tokens, 4
