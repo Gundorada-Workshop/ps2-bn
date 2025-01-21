@@ -1,6 +1,7 @@
 from __future__ import annotations
 from enum import Enum, auto, unique
 from typing import Optional, Callable, Type, TYPE_CHECKING
+from binaryninja.architecture import RegisterName
 
 if TYPE_CHECKING:
     from ..Arch import EmotionEngine
@@ -16,9 +17,9 @@ class Instruction:
     type: InstructionType
     name: Optional[str]
     branch_dest: Optional[int]
-    reg1: Optional[int]
-    reg2: Optional[int]
-    reg3: Optional[int]
+    reg1: Optional[RegisterName]
+    reg2: Optional[RegisterName]
+    reg3: Optional[RegisterName]
     operand: Optional[str]
     il_func: Optional[Callable]
     arch: Optional[Type[EmotionEngine]]

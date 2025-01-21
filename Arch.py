@@ -3,10 +3,9 @@ from typing import Optional
 from .ps2.decode import decode
 from .ps2.instruction import Instruction, InstructionType
 from .ps2.ee.registers import registers as EERegisters
-from .ps2.ee.registers import get_name as get_gpr_name
 from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG, RA_REG, SP_REG
 from .ps2.fpu.registers import registers as FPURegisters
-from .ps2.vu0.registers import registers as VU0FRegisters
+from .ps2.vu0f.registers import registers as VU0FRegisters
 from binaryninja.architecture import Architecture
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
 from binaryninja.enums import InstructionTextTokenType, BranchType
@@ -68,19 +67,19 @@ class EmotionEngine(Architecture):
         match instruction.type:
             case IT.GenericInt:
                 if instruction.reg1 is not None:
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.reg1)))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg1))
                 if instruction.reg2 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.reg2)))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg2))
                 if instruction.reg3 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.reg3)))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg3))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
                     tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str(instruction.operand)))
             case IT.Branch:
                 if instruction.reg1 is not None:
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.reg1)))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg1))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, str(instruction.operand)))
 
