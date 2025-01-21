@@ -79,7 +79,12 @@ class EmotionEngine(Architecture):
                     tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg3))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str(instruction.operand)))
+                    if instruction.hex_operand:
+                        operand = hex(instruction.operand)
+                    else:
+                        operand = str(instruction.operand)
+
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, operand))
             case IT.Branch:
                 if instruction.reg1 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg1))
