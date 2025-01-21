@@ -365,12 +365,12 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.branch_dest = offset
 
             # psuedo-ops
-            if ee_get_name(instruction.reg1) == ZERO_REG and \
-                ee_get_name(instruction.reg2) == ZERO_REG:
+            if instruction.reg1 == ZERO_REG and \
+                instruction.reg2 == ZERO_REG:
                 instruction.name = "b"
-            elif ee_get_name(instruction.reg2) == ZERO_REG:
+            elif instruction.reg2 == ZERO_REG:
                 instruction.name = "beqz"
-            elif ee_get_name(instruction.reg1) == ZERO_REG:
+            elif instruction.reg1 == ZERO_REG:
                 # swap registers so $zero is last for easier handling later
                 instruction.name = "beqz"
                 instruction.reg1, instruction.reg2 = instruction.reg2, instruction.reg1
@@ -384,9 +384,9 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.branch_dest = offset
 
             # psuedo-ops
-            if ee_get_name(instruction.reg2) == ZERO_REG:
+            if instruction.reg2 == ZERO_REG:
                 instruction.name = "bnez"
-            elif ee_get_name(instruction.reg1) == ZERO_REG:
+            elif instruction.reg1 == ZERO_REG:
                 # swap registers so $zero is last for easier handling later
                 instruction.name = "bnez"
                 instruction.reg1, instruction.reg2 = instruction.reg2, instruction.reg1
@@ -479,9 +479,9 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.branch_dest = offset
 
             # psuedo-ops
-            if ee_get_name(instruction.reg2) == ZERO_REG:
+            if instruction.reg2 == ZERO_REG:
                 instruction.name = "beqzl"
-            elif ee_get_name(instruction.reg1) == ZERO_REG:
+            elif instruction.reg1 == ZERO_REG:
                 # swap registers so $zero is last for easier handling later
                 instruction.name = "beqzl"
                 instruction.reg1, instruction.reg2 = instruction.reg2, instruction.reg1
@@ -495,9 +495,9 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.branch_dest = offset
 
             # psuedo-ops
-            if ee_get_name(instruction.reg2) == ZERO_REG:
+            if instruction.reg2 == ZERO_REG:
                 instruction.name = "bnezl"
-            elif ee_get_name(instruction.reg1) == ZERO_REG:
+            elif instruction.reg1 == ZERO_REG:
                 # swap registers so $zero is last for easier handling later
                 instruction.name = "bnezl"
                 instruction.reg1, instruction.reg2 = instruction.reg2, instruction.reg1

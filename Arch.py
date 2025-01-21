@@ -32,6 +32,9 @@ class EmotionEngine(Architecture):
         instruction = decode(data[0:4], addr)
         IT = InstructionType
 
+        if instruction is None:
+            print(f"INSTRUCTION NONE {bytes}")
+
         result = InstructionInfo()
         result.length = 4
 
@@ -39,7 +42,7 @@ class EmotionEngine(Architecture):
             result.branch_delay = 1
             match instruction.name:
                 case "jr":
-                    if EERegisters[instruction.reg1] == EmotionEngine.link_register:
+                    if instruction.reg1 == EmotionEngine.link_register:
                         result.add_branch(BranchType.FunctionReturn)
                     else:
                         result.add_branch(BranchType.IndirectBranch)
@@ -113,7 +116,9 @@ class EmotionEngine(Architecture):
                 # Command in branch delay slot unimplemented...
                 length -= 4
             else:
-                instruction2.il_func(instruction2, addr, il)
+                pass
+                #instruction2.il_func(instruction2, addr, il)
         
-        instruction1.il_func(instruction1, addr, il)
+        #instruction1.il_func(instruction1, addr, il)
+        il.append(il.unimplemented()) # TEMP
         return length
