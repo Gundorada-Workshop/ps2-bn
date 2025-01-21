@@ -1,5 +1,9 @@
+from __future__ import annotations
 from enum import Enum, auto, unique
-from typing import Optional, Callable
+from typing import Optional, Callable, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..Arch import EmotionEngine
 
 @unique
 class InstructionType(Enum):
@@ -15,6 +19,7 @@ class Instruction:
     source2: Optional[int]
     operand: Optional[str]
     il_func: Optional[Callable]
+    arch: Optional[EmotionEngine]
 
     def __init__(self):
         self.type = InstructionType.UNDEFINED
@@ -24,3 +29,4 @@ class Instruction:
         self.source2 = None
         self.operand = None
         self.il_func = None
+        self.arch = None

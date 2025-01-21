@@ -10,7 +10,7 @@ def sll(instruction: Instruction, il):
     il.append(il.set_reg(4, get_name(instruction.dest), val))
 
 def jr(instruction: Instruction, il):
-    if get_name(instruction.dest) == "$ra":
+    if get_name(instruction.dest) == instruction.arch.link_register:
         il.append(il.ret(0))
     else:
         il.append(il.unimplemented())

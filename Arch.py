@@ -4,7 +4,7 @@ from .ps2.decode import decode
 from .ps2.instruction import Instruction, InstructionType
 from .ps2.ee.registers import registers as EERegisters
 from .ps2.ee.registers import get_name as get_gpr_name
-from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG
+from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG, RA_REG, SP_REG
 from binaryninja.architecture import Architecture
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
 from binaryninja.enums import InstructionTextTokenType, BranchType
@@ -18,8 +18,8 @@ class EmotionEngine(Architecture):
 
     regs = {name: RegisterInfo(name, size) for name, size in EERegisters}
 
-    stack_pointer = '$sp'
-    link_register = '$ra'
+    stack_pointer = SP_REG
+    link_register = RA_REG
     operand_separator = ', '
 
     def get_instruction_info(self, data: bytes, addr: int):
@@ -87,12 +87,31 @@ class EmotionEngine(Architecture):
         return tokens, 4
     
     def get_instruction_low_level_il(self, data: bytes, addr: int, il) -> Optional[int]:
+        print(data, addr)
         if len(data) < 4:
             return None
-        instruction = decode(data[0:4], addr)
-        if instruction.il_func is None:
+        
+        length = 4
+
+        instruction1 = decode(data[0:4], addr)        
+        instruction1.arch = EmotionEngine
+        if instruction1.il_func is None:
             il.append(il.unimplemented())
             return 4
         
-        instruction.il_func(instruction, il)
-        return 4
+        instruction2 = None
+        if instruction1.type == InstructionType.Branch:
+            assert len(data) >= 8, "Branch at end of file??"
+            instruction2 = decode(data[4:8], addr + 4)
+            length += 4
+
+        if instruction2 is not None:
+            instruction2.arch = EmotionEngine
+            if instruction2.il_func is None:
+                # Command in branch delay slot unimplemented...
+                length -= 4
+            else:
+                instruction2.il_func(instruction2, il)
+        
+        instruction1.il_func(instruction1, il)
+        return length
