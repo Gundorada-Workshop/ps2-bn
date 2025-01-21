@@ -2,7 +2,9 @@ from __future__ import annotations
 from typing import Optional
 from .ps2.decode import decode
 from .ps2.instruction import Instruction, InstructionType
-from .ps2.ee.registers import gpr as EERegisters
+from .ps2.ee.registers import registers as EERegisters
+from .ps2.ee.registers import get_name as get_gpr_name
+from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG
 from binaryninja.architecture import Architecture
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
 from binaryninja.enums import InstructionTextTokenType, BranchType
@@ -14,7 +16,7 @@ class EmotionEngine(Architecture):
     instr_alignment  = 4
     max_instr_length = 8 # Branch + Branch delay slot
 
-    regs = {r: RegisterInfo(r, 16) for r in EERegisters.values()}
+    regs = {name: RegisterInfo(name, size) for name, size in EERegisters}
 
     stack_pointer = '$sp'
     link_register = '$ra'
@@ -62,19 +64,19 @@ class EmotionEngine(Architecture):
         match instruction.type:
             case IT.GenericInt:
                 if instruction.dest is not None:
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, EERegisters[instruction.dest]))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.dest)))
                 if instruction.source1 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, EERegisters[instruction.source1]))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.source1)))
                 if instruction.source2 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, EERegisters[instruction.source2]))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.source2)))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
                     tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str(instruction.operand)))
             case IT.Branch:
                 if instruction.dest is not None:
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, EERegisters[instruction.dest]))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.dest)))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, str(instruction.operand)))
 
