@@ -362,7 +362,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset
+            instruction.branch_dest = offset + addr
 
             # psuedo-ops
             if instruction.reg1 == ZERO_REG and \
@@ -381,7 +381,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset
+            instruction.branch_dest = offset + addr
 
             # psuedo-ops
             if instruction.reg2 == ZERO_REG:
@@ -396,14 +396,14 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.name = "blez"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset
+            instruction.branch_dest = offset + addr
         case 0x07:
             # bgtz
             instruction.type = IT.Branch
             instruction.name = "bgtz"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset
+            instruction.branch_dest = offset + addr
         case 0x08:
             # addi
             instruction.type = IT.GenericInt
@@ -481,7 +481,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset
+            instruction.branch_dest = offset + addr
 
             # psuedo-ops
             if instruction.reg2 == ZERO_REG:
@@ -497,7 +497,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset
+            instruction.branch_dest = offset + addr
 
             # psuedo-ops
             if instruction.reg2 == ZERO_REG:
@@ -512,14 +512,14 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.name = "blezl"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset
+            instruction.branch_dest = offset + addr
         case 0x17:
             # bgtzl
             instruction.type = IT.Branch
             instruction.name = "bgtzl"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset
+            instruction.branch_dest = offset + addr
         case 0x18:
             # daddi
             instruction.type = IT.GenericInt
