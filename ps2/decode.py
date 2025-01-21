@@ -718,5 +718,5 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
-        case _:
-            return instruction
+        
+    return instruction
