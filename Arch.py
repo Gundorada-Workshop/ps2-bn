@@ -84,7 +84,11 @@ class EmotionEngine(Architecture):
         if instruction.type == IT.UNDEFINED:
             return None
         
-        tokens.append(InstructionTextToken(InstructionTextTokenType.InstructionToken, f"{instruction.name:7s} "))
+        # Instruction name + spaces
+        pad = 7 # Spaces will be padded to a *multiple* of this length
+        spaces = " " * ((pad - len(instruction.name)) % pad + 1)
+        tokens.append(InstructionTextToken(InstructionTextTokenType.InstructionToken, instruction.name))
+        tokens.append(InstructionTextToken(InstructionTextTokenType.TextToken, spaces))
 
         match instruction.type:
             case IT.GenericInt:
@@ -104,5 +108,9 @@ class EmotionEngine(Architecture):
                     tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, EmotionEngine.gpr[instruction.dest]))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, str(instruction.operand)))
+
+        if len(tokens) == 2:
+            # Remove spaces from instruction only text
+            del tokens[1]
 
         return tokens, 4
