@@ -22,7 +22,7 @@ def _decode_special(opcode: int, addr: int) -> Instruction:
             instruction.type = IT.GenericInt
 
             dest = ee_get_name((opcode >> 11) & 0x1F)
-            if dest == 0:
+            if dest == ZERO_REG:
                 # nop
                 instruction.name = "nop"
                 instruction.il_func = ee_func.nop
