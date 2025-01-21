@@ -32,9 +32,6 @@ class EmotionEngine(Architecture):
         instruction = decode(data[0:4], addr)
         IT = InstructionType
 
-        if instruction is None:
-            print(f"INSTRUCTION NONE {bytes}")
-
         result = InstructionInfo()
         result.length = 4
 
@@ -46,7 +43,15 @@ class EmotionEngine(Architecture):
                         result.add_branch(BranchType.FunctionReturn)
                     else:
                         result.add_branch(BranchType.IndirectBranch)
-                # TODO other branches
+                case "jal":
+                    result.add_branch(BranchType.CallDestination, instruction.branch_dest)
+                case "jalr":
+                    result.add_branch(BranchType.IndirectBranch)
+                case "b" | "j":
+                    result.add_branch(BranchType.UnconditionalBranch, instruction.branch_dest)
+                case _:
+                    result.add_branch(BranchType.TrueBranch, instruction.branch_dest)
+                    result.add_branch(BranchType.FalseBranch, addr + 8)
 
         return result
     
@@ -124,18 +129,14 @@ class EmotionEngine(Architecture):
         
         instruction2 = None
         if instruction1.type == InstructionType.Branch:
-            assert len(data) >= 8, "Branch at end of file??"
-            instruction2 = decode(data[4:8], addr + 4)
-            length += 4
+            if len(data) >= 8:
+                instruction2 = decode(data[4:8], addr + 4)
 
         if instruction2 is not None:
             instruction2.arch = EmotionEngine
-            if instruction2.il_func is None:
-                # Command in branch delay slot unimplemented...
-                length -= 4
-            else:
-                pass
+            if instruction2.il_func is not None:
                 #instruction2.il_func(instruction2, addr, il)
+                length += 4
         
         #instruction1.il_func(instruction1, addr, il)
         il.append(il.unimplemented()) # TEMP
