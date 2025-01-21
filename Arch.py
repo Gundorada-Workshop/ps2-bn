@@ -5,6 +5,8 @@ from .ps2.instruction import Instruction, InstructionType
 from .ps2.ee.registers import registers as EERegisters
 from .ps2.ee.registers import get_name as get_gpr_name
 from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG, RA_REG, SP_REG
+from .ps2.fpu.registers import registers as FPURegisters
+from .ps2.vu0.registers import registers as VU0FRegisters
 from binaryninja.architecture import Architecture
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
 from binaryninja.enums import InstructionTextTokenType, BranchType
@@ -16,7 +18,9 @@ class EmotionEngine(Architecture):
     instr_alignment  = 4
     max_instr_length = 8 # Branch + Branch delay slot
 
-    regs = {name: RegisterInfo(name, size) for name, size in EERegisters}
+    regs = {name: RegisterInfo(name, size) for name, size in EERegisters} | \
+           {name: RegisterInfo(name, size) for name, size in FPURegisters} | \
+           {name: RegisterInfo(name, size) for name, size in VU0FRegisters}
 
     stack_pointer = SP_REG
     link_register = RA_REG
