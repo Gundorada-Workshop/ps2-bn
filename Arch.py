@@ -95,6 +95,14 @@ class EmotionEngine(Architecture):
                     if instruction.reg1 is not None and instruction.reg1 != ZERO_REG:
                         tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
                     tokens.append(InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, hex(instruction.branch_dest)))
+            case IT.LoadStore:
+                tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg1))
+                tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
+                str_func = hex if instruction.operand >= 10 else str
+                tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str_func(instruction.operand)))
+                tokens.append(InstructionTextToken(InstructionTextTokenType.BeginMemoryOperandToken, "("))
+                tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg2))
+                tokens.append(InstructionTextToken(InstructionTextTokenType.EndMemoryOperandToken, ")"))
 
         if len(tokens) == 2:
             # Remove spaces from instruction only text
