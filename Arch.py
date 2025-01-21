@@ -46,9 +46,11 @@ class EmotionEngine(Architecture):
                 case "jal":
                     result.add_branch(BranchType.CallDestination, instruction.branch_dest)
                 case "jalr":
-                    result.add_branch(BranchType.IndirectBranch)
+                    result.add_branch(BranchType.CallDestination)
                 case "b" | "j":
                     result.add_branch(BranchType.UnconditionalBranch, instruction.branch_dest)
+                case "syscall":
+                    result.add_branch(BranchType.SystemCall)
                 case _:
                     result.add_branch(BranchType.TrueBranch, instruction.branch_dest)
                     result.add_branch(BranchType.FalseBranch, addr + 8)

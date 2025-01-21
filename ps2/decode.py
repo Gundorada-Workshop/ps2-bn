@@ -99,7 +99,7 @@ def _decode_special(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x0C:
             # syscall
-            instruction.type = IT.GenericInt
+            instruction.type = IT.Branch
             instruction.name = "syscall"
         case 0x0D:
             # break
