@@ -10,7 +10,12 @@ def sign_extend_16_bit(i: int):
         i -= 0x10000
     return i
 
-@staticmethod
+def get_branch_dest(opcode: int, addr: int) -> int:
+    offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
+    offset += addr
+    offset += 4 # for branch delay slot
+    return offset
+
 def _decode_special(opcode: int, addr: int) -> Instruction:
     instruction = Instruction()
     IT = InstructionType
@@ -327,7 +332,6 @@ def _decode_special(opcode: int, addr: int) -> Instruction:
             instruction.operand = (opcode >> 6) & 0x1F
     return instruction
 
-@staticmethod
 def decode(data: bytes, addr: int) -> Instruction:
     opcode = int.from_bytes(data, "little")
     op = opcode >> 26
@@ -361,8 +365,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.name = "beq"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
-            offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset + addr
+            instruction.branch_dest = get_branch_dest(opcode, addr)
 
             # psuedo-ops
             if instruction.reg1 == ZERO_REG and \
@@ -380,8 +383,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.name = "bne"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
-            offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset + addr
+            instruction.branch_dest = get_branch_dest(opcode, addr)
 
             # psuedo-ops
             if instruction.reg2 == ZERO_REG:
@@ -395,15 +397,13 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.type = IT.Branch
             instruction.name = "blez"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
-            offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset + addr
+            instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x07:
             # bgtz
             instruction.type = IT.Branch
             instruction.name = "bgtz"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
-            offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset + addr
+            instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x08:
             # addi
             instruction.type = IT.GenericInt
@@ -480,8 +480,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.name = "beql"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
-            offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset + addr
+            instruction.branch_dest = get_branch_dest(opcode, addr)
 
             # psuedo-ops
             if instruction.reg2 == ZERO_REG:
@@ -496,8 +495,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.name = "bnel"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
-            offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset + addr
+            instruction.branch_dest = get_branch_dest(opcode, addr)
 
             # psuedo-ops
             if instruction.reg2 == ZERO_REG:
@@ -511,15 +509,13 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.type = IT.Branch
             instruction.name = "blezl"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
-            offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset + addr
+            instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x17:
             # bgtzl
             instruction.type = IT.Branch
             instruction.name = "bgtzl"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
-            offset = sign_extend_16_bit(opcode & 0xFFFF) << 2
-            instruction.branch_dest = offset + addr
+            instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x18:
             # daddi
             instruction.type = IT.GenericInt
