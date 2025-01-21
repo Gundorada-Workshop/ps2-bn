@@ -1,27 +1,5 @@
-from enum import Enum, auto, unique
-from typing import Optional
-
-@unique
-class InstructionType(Enum):
-    UNDEFINED = auto()
-    GenericInt = auto()
-    Branch = auto()
-
-class Instruction:
-    type: InstructionType
-    name: Optional[str]
-    dest: Optional[int]
-    source1: Optional[int]
-    source2: Optional[int]
-    operand: Optional[str]
-
-    def __init__(self):
-        self.type = InstructionType.UNDEFINED
-        self.name = None
-        self.dest = None
-        self.source1 = None
-        self.source2 = None
-        self.operand = None
+from .ee import il as ee_func
+from .instruction import Instruction, InstructionType
 
 @staticmethod
 def _decode_special(opcode: int, addr: int) -> Instruction:
@@ -38,8 +16,10 @@ def _decode_special(opcode: int, addr: int) -> Instruction:
             if dest == 0:
                 # nop
                 instruction.name = "nop"
+                instruction.il_func = ee_func.nop
             else:   
                 instruction.name = "sll"
+                instruction.il_func = ee_func.sll
                 instruction.dest = dest
                 instruction.source1 = (opcode >> 16) & 0x1F
                 instruction.operand = (opcode >> 6) & 0x1F
@@ -82,6 +62,7 @@ def _decode_special(opcode: int, addr: int) -> Instruction:
             # jr
             instruction.type = IT.Branch
             instruction.name = "jr"
+            instruction.il_func = ee_func.jr
             instruction.dest = (opcode >> 21) & 0x1F
         case 0x09:
             # jalr
