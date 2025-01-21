@@ -36,7 +36,7 @@ class EmotionEngine(Architecture):
             result.branch_delay = 1
             match instruction.name:
                 case "jr":
-                    if EERegisters[instruction.dest] == EmotionEngine.link_register:
+                    if EERegisters[instruction.reg1] == EmotionEngine.link_register:
                         result.add_branch(BranchType.FunctionReturn)
                     else:
                         result.add_branch(BranchType.IndirectBranch)
@@ -63,20 +63,20 @@ class EmotionEngine(Architecture):
 
         match instruction.type:
             case IT.GenericInt:
-                if instruction.dest is not None:
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.dest)))
-                if instruction.source1 is not None:
+                if instruction.reg1 is not None:
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.reg1)))
+                if instruction.reg2 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.source1)))
-                if instruction.source2 is not None:
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.reg2)))
+                if instruction.reg3 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.source2)))
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.reg3)))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
                     tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str(instruction.operand)))
             case IT.Branch:
-                if instruction.dest is not None:
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.dest)))
+                if instruction.reg1 is not None:
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, get_gpr_name(instruction.reg1)))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, str(instruction.operand)))
 
@@ -87,7 +87,6 @@ class EmotionEngine(Architecture):
         return tokens, 4
     
     def get_instruction_low_level_il(self, data: bytes, addr: int, il) -> Optional[int]:
-        print(data, addr)
         if len(data) < 4:
             return None
         
@@ -111,7 +110,7 @@ class EmotionEngine(Architecture):
                 # Command in branch delay slot unimplemented...
                 length -= 4
             else:
-                instruction2.il_func(instruction2, il)
+                instruction2.il_func(instruction2, addr, il)
         
-        instruction1.il_func(instruction1, il)
+        instruction1.il_func(instruction1, addr, il)
         return length

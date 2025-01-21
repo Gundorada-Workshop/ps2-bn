@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum, auto, unique
-from typing import Optional, Callable, TYPE_CHECKING
+from typing import Optional, Callable, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..Arch import EmotionEngine
@@ -10,23 +10,26 @@ class InstructionType(Enum):
     UNDEFINED = auto()
     GenericInt = auto()
     Branch = auto()
+    LoadStore = auto()
 
 class Instruction:
     type: InstructionType
     name: Optional[str]
-    dest: Optional[int]
-    source1: Optional[int]
-    source2: Optional[int]
+    branch_dest: Optional[int]
+    reg1: Optional[int]
+    reg2: Optional[int]
+    reg3: Optional[int]
     operand: Optional[str]
     il_func: Optional[Callable]
-    arch: Optional[EmotionEngine]
+    arch: Optional[Type[EmotionEngine]]
 
     def __init__(self):
         self.type = InstructionType.UNDEFINED
         self.name = None
-        self.dest = None
-        self.source1 = None
-        self.source2 = None
+        self.branch_dest = None
+        self.reg1 = None
+        self.reg2 = None
+        self.reg3 = None
         self.operand = None
         self.il_func = None
         self.arch = None
