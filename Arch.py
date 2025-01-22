@@ -63,6 +63,8 @@ class EmotionEngine(Architecture):
                     result.add_branch(BranchType.FunctionReturn)
                     result.branch_delay = 0
                 case _:
+                    if instruction.branch_dest is None:
+                        raise RuntimeError(f"Invalid branch dest for {instruction.name}")
                     result.add_branch(BranchType.TrueBranch, instruction.branch_dest)
                     result.add_branch(BranchType.FalseBranch, addr + 8)
 
@@ -141,16 +143,15 @@ class EmotionEngine(Architecture):
             return 4
         
         instruction2 = None
-        if instruction1.type == InstructionType.Branch:
+        if instruction1.type == InstructionType.Branch and instruction1.name != "eret":
             if len(data) >= 8:
                 instruction2 = decode(data[4:8], addr + 4)
 
         if instruction2 is not None:
             instruction2.arch = EmotionEngine
             if instruction2.il_func is not None:
-                #instruction2.il_func(instruction2, addr, il)
+                instruction2.il_func(instruction2, addr, il)
                 length += 4
         
-        #instruction1.il_func(instruction1, addr, il)
-        il.append(il.unimplemented()) # TEMP
+        instruction1.il_func(instruction1, addr, il)
         return length

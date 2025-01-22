@@ -20,6 +20,73 @@ def get_branch_dest(opcode: int, addr: int) -> int:
     offset += 4 # for branch delay slot
     return offset
 
+def decode_regimm(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 16) & 0x1F
+
+    match op:
+        case 0x00:
+            # bltz
+            instruction.type = IT.Branch
+            instruction.name = "bltz"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+        case 0x01:
+            # bgez
+            instruction.type = IT.Branch
+            instruction.name = "bgez"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+        case 0x02:
+            # bltzl
+            instruction.type = IT.Branch
+            instruction.name = "bltzl"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+        case 0x03:
+            # bgezl
+            instruction.type = IT.Branch
+            instruction.name = "bgezl"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+        case 0x10:
+            # bltzal
+            instruction.type = IT.Branch
+            instruction.name = "bltzal"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+        case 0x11:
+            # bgezal
+            instruction.type = IT.Branch
+            instruction.name = "bgezal"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+        case 0x12:
+            # bltzall
+            instruction.type = IT.Branch
+            instruction.name = "bltzall"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+        case 0x13:
+            # bgezall
+            instruction.type = IT.Branch
+            instruction.name = "bgezall"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+        case 0x18:
+            # mtsab
+            instruction.type = IT.GenericInt
+            instruction.name = "mtsab"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x19:
+            # mtsah
+            instruction.type = IT.GenericInt
+            instruction.name = "mtsah"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+
+    return instruction
+
 def decode_cop(opcode: int, addr: int) -> Instruction:
     instruction = Instruction()
     IT = InstructionType
@@ -1213,9 +1280,7 @@ def decode(data: bytes, addr: int) -> Instruction:
         case 0x00:
             return decode_special(opcode, addr)
         case 0x01:
-            # TODO
-            # regimm
-            pass
+            return decode_regimm(opcode, addr)
         case 0x02:
             # j
             instruction.type = IT.Branch
