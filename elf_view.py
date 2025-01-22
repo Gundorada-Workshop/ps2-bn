@@ -3,10 +3,9 @@ import struct
 from binaryninja import BinaryView, Architecture, log_info
 from binaryninja.enums import SegmentFlag
 
-from .ElfLoader import HeaderOffsets, FileHeader, EndianType
+from .elf import HeaderOffsets, FileHeader, EndianType, read_elf_header
 
-ELF_MAGIC_ID   = b'\x7fELF'
-R9000_MAGIC_ID = 0x00920000
+TX79_FLAG = 0x00920000
 
 class PS2ExecutableView(BinaryView):
     name      = "PS2 ELF"
@@ -14,21 +13,19 @@ class PS2ExecutableView(BinaryView):
 
     @classmethod
     def is_valid_for_data(self, data: BinaryView) -> bool:
-        magic  = data.read(0x0, 4)
-        endian = int.from_bytes(data.read(0x5, 1),  'little')
-        flags  = int.from_bytes(data.read(0x24, 4), 'little')
+        header = read_elf_header(data)
 
-        log_info(magic)
-        log_info(endian)
-        log_info(flags)
-
-        if magic != ELF_MAGIC_ID:
+        # not an elf
+        if header is None:
             return False
         
-        if EndianType(endian) != EndianType.Little:
+        # ps2 is le so we don't care about be elfs
+        if header.endian != EndianType.Little:
             return False
         
-        if flags & R9000_MAGIC_ID != R9000_MAGIC_ID:
+        # platform specific flags
+        # in this case Toshiba hides the EE check here
+        if header.flags & TX79_FLAG != TX79_FLAG:
             return False
     
         return True
@@ -36,21 +33,16 @@ class PS2ExecutableView(BinaryView):
     def __init__(self, data: BinaryView):
         BinaryView.__init__(self, parent_view = data, file_metadata = data.file)
 
+        print("init")
+
         self.arch     = Architecture["EmotionEngine"]
         self.platform = Architecture["EmotionEngine"].standalone_platform
         self.data     = data
-
-        magic  = data.read(0x0, 4)
-        format = data.read(0x4, 1)
-        endian = data.read(0x5, 1)
-
-        log_info(magic)
-        log_info(format)
-        log_info(endian)
+        self.header   = read_elf_header(data)
 
     def init(self) -> bool:
         self.add_auto_segment(0x00100000, 0xd0fa0, 0x001000, 0xd0fa0, SegmentFlag.SegmentReadable|SegmentFlag.SegmentExecutable)
-        self.add_entry_point(0x100008)
+        self.add_entry_point(self.header.entry_point)
 
         return True
     

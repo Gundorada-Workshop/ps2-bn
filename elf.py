@@ -1,31 +1,45 @@
-import struct
-from enum import Enum
+from enum import Enum, IntEnum
+from typing import Optional
+
+from binaryninja import BinaryView, log_info
 
 # https://en.wikipedia.org/wiki/Executable_and_Linkable_Format
 
-class EndianType(Enum):
+ELF_MAGIC_ID = b'\x7fELF'
+
+class EndianType(IntEnum):
     Undefined = 0x0,
     Little    = 0x1
     Big       = 0x2
 
-class FormatType(Enum):
+class FormatType(IntEnum):
     Undefined = 0x0
     Format32  = 0x1
     Format64  = 0x2
 
-class HeaderOffsets(Enum):
-    Magic       = 0x00
-    Class       = 0x04
-    Data        = 0x05
-    Version     = 0x06
-    Abi         = 0x07
-    AbiVersion  = 0x08
-    Type        = 0x10
-    Machine     = 0x12
-    Version2    = 0x14
-    Entry       = 0x18
+# 32 bit only
+class HeaderOffsets(IntEnum):
+    Magic                    = 0x00
+    Class                    = 0x04
+    Data                     = 0x05
+    Version                  = 0x06
+    Abi                      = 0x07
+    AbiVersion               = 0x08
+    Type                     = 0x10
+    Machine                  = 0x12
+    Version2                 = 0x14
+    Entry                    = 0x18
+    ProgramHeaderOffset      = 0x1C
+    SectionHeaderOffset      = 0x20
+    MachineFlags             = 0x24
+    HeaderSize               = 0x28
+    ProgramHeaderSize        = 0x2A
+    ProgramHeaderCount       = 0x2C
+    SectionHeaderSize        = 0x2E
+    SectionHeaderCount       = 0x30
+    SectionHeaderStringIndex = 0x32
 
-class AbiType(Enum):
+class AbiType(IntEnum):
     SystemV = 0x00
     HPUX    = 0x01
     NetBSD  = 0x02
@@ -42,7 +56,7 @@ class AbiType(Enum):
     Nuxi    = 0x11
     OpenVOS = 0x12
 
-class MachineType(Enum):
+class MachineType(IntEnum):
     Undefined = 0x00
     Bellmac32 = 0x01
     SPARC     = 0x02
@@ -72,7 +86,7 @@ class MachineType(Enum):
     ColdFire  = 0x34
     Cell      = 0x38
 
-class SegmentType(Enum):
+class SegmentType(IntEnum):
     Null               = 0x00
     Loadable           = 0x01
     Dynamic            = 0x02
@@ -81,12 +95,12 @@ class SegmentType(Enum):
     ProgramHeader      = 0x06
     ThreadLocalStorage = 0x07
 
-class SegmentFlags(Enum):
+class SegmentFlags(IntEnum):
     Executable = 0x1
     Writeable  = 0x2
     Readable   = 0x3
 
-class SectionType(Enum):
+class SectionType(IntEnum):
     Null                     = 0x00
     ProgramBits              = 0x01
     SymbolTable              = 0x02
@@ -105,7 +119,7 @@ class SectionType(Enum):
     ExtendedSectionIndices   = 0x12
     TypeCound                = 0x13
 
-class SectionAttributeFlags(Enum):
+class SectionAttributeFlags(IntEnum):
     Write           = 1 << 0
     Alloc           = 1 << 1
     Executable      = 1 << 2
@@ -155,4 +169,33 @@ class FileHeader:
     section_header_size: int
     section_header_count: int
     section_header_name_index: int
-    
+
+def read_elf_header(data: BinaryView) -> Optional[FileHeader]:
+    header = FileHeader()
+
+    header.magic = data.read(HeaderOffsets.Magic, 4)
+
+    if header.magic != ELF_MAGIC_ID:
+        return None
+
+    bits = data.read(HeaderOffsets.Class, 1)
+    header.format = int.from_bytes(bits, 'little')
+
+    # dont support reading elf64
+    if header.format != FormatType.Format32:
+        return None
+
+    endian = data.read(HeaderOffsets.Data, 1)
+    flags  = data.read(HeaderOffsets.MachineFlags, 4)
+    abi    = data.read(HeaderOffsets.Abi, 1)
+    arch   = data.read(HeaderOffsets.Machine, 2)
+    entry  = data.read(HeaderOffsets.Entry, 4)
+
+    header.endian      = int.from_bytes(endian, 'little')
+    header.abi         = int.from_bytes(abi,    'little')
+    header.arch        = int.from_bytes(arch,   'little')
+    header.entry_point = int.from_bytes(entry,  'little')
+
+    header.flags  = int.from_bytes(flags,  'little')
+
+    return header
