@@ -51,6 +51,6 @@ registers: List[Tuple[RegisterName, int]] = [
 
 def get_name(index: int) -> RegisterName:
     if not 0 <= index < 32:
-        return ValueError(f"Invalid EE GPR register index {index}")
+        raise ValueError(f"Invalid EE GPR register index {index}")
 
     return registers[index][0]

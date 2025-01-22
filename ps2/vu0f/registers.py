@@ -39,6 +39,22 @@ registers: List[Tuple[RegisterName, int]] = [
 
 def get_name(index: int) -> RegisterName:
     if not 0 <= index < 32:
-        return ValueError(f"Invalid register index {index}")
+        raise ValueError(f"Invalid VU0F register index {index}")
+
+    return registers[index][0]
+
+# name, size
+# TODO
+c_registers: List[Tuple[RegisterName, int]] = [
+    (RegisterName(f"$vcr{i}"), 4) for i in range(0, 32)
+]
+
+CONDITION_REG = RegisterName("COP2_CONDITION")
+
+c_registers.append((CONDITION_REG, 4))
+
+def get_c_name(index: int) -> RegisterName:
+    if not 0 <= index < 32:
+        raise ValueError(f"Invalid VU0 Control register index {index}")
 
     return registers[index][0]

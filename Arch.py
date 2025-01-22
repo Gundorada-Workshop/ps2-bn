@@ -5,7 +5,11 @@ from .ps2.instruction import Instruction, InstructionType
 from .ps2.ee.registers import registers as EERegisters
 from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG, RA_REG, SP_REG, ZERO_REG
 from .ps2.fpu.registers import registers as FPURegisters
+from .ps2.fpu.registers import c_registers as FPUCRegisters
 from .ps2.vu0f.registers import registers as VU0FRegisters
+from .ps2.vu0f.registers import c_registers as VU0CRegisters
+from .ps2.cop0.registers import registers as COP0Registers
+from .ps2.cop0.registers import c_registers as COP0CRegisters
 from binaryninja.architecture import Architecture
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
 from binaryninja.enums import InstructionTextTokenType, BranchType
@@ -18,8 +22,12 @@ class EmotionEngine(Architecture):
     max_instr_length = 8 # Branch + Branch delay slot
 
     regs = {name: RegisterInfo(name, size) for name, size in EERegisters} | \
+           {name: RegisterInfo(name, size) for name, size in COP0Registers} | \
+           {name: RegisterInfo(name, size) for name, size in COP0CRegisters} | \
            {name: RegisterInfo(name, size) for name, size in FPURegisters} | \
-           {name: RegisterInfo(name, size) for name, size in VU0FRegisters}
+           {name: RegisterInfo(name, size) for name, size in FPUCRegisters} | \
+           {name: RegisterInfo(name, size) for name, size in VU0FRegisters} | \
+           {name: RegisterInfo(name, size) for name, size in VU0CRegisters} 
 
     stack_pointer = SP_REG
     link_register = RA_REG
@@ -51,6 +59,9 @@ class EmotionEngine(Architecture):
                     result.add_branch(BranchType.UnconditionalBranch, instruction.branch_dest)
                 case "syscall":
                     result.add_branch(BranchType.SystemCall)
+                case "eret":
+                    result.add_branch(BranchType.FunctionReturn)
+                    result.branch_delay = 0
                 case _:
                     result.add_branch(BranchType.TrueBranch, instruction.branch_dest)
                     result.add_branch(BranchType.FalseBranch, addr + 8)

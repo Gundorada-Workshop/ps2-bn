@@ -1,8 +1,12 @@
 from .ee import il as ee_func
-from .ee.registers import get_name as ee_get_name
 from .ee.registers import ZERO_REG
+from .ee.registers import get_name as ee_get_name
 from .fpu.registers import get_name as fpu_get_name
 from .vu0f.registers import get_name as vu0f_get_name
+from .cop0.registers import get_name as cop0_get_name
+from .fpu.registers import get_c_name as fpu_get_c_name
+from .vu0f.registers import get_c_name as vu0f_get_c_name
+from .cop0.registers import get_c_name as cop0_get_c_name
 from .instruction import Instruction, InstructionType
 
 def sign_extend_16_bit(i: int):
@@ -15,6 +19,137 @@ def get_branch_dest(opcode: int, addr: int) -> int:
     offset += addr
     offset += 4 # for branch delay slot
     return offset
+
+def decode_cop(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 21) & 0x1F
+    cop_id = ((opcode >> 26) & 0x3)
+
+    if cop_id == 2 and op >= 0x10:
+        return decode_cop2_special(opcode, addr)
+    
+    match (op | (cop_id * 0x100)):
+        case 0x000:
+            # mfc0
+            instruction.type = IT.GenericInt
+            instruction.name = "mfc0"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = cop0_get_name((opcode >> 11) & 0x1F)
+        case 0x100:
+            # mfc1
+            instruction.type = IT.GenericInt
+            instruction.name = "mfc1"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+        case 0x004:
+            # mtc0
+            instruction.type = IT.GenericInt
+            instruction.name = "mtc0"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = cop0_get_name((opcode >> 11) & 0x1F)
+        case 0x104:
+            # mtc1
+            instruction.type = IT.GenericInt
+            instruction.name = "mtc1"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+        case 0x010:
+            op2 = opcode & 0x3F
+            match op2:
+                case 0x1:
+                    # tlbr
+                    instruction.type = IT.GenericInt
+                    instruction.name = "tlbr"
+                case 0x2:
+                    # tlbwi
+                    instruction.type = IT.GenericInt
+                    instruction.name = "tlbwi"
+                case 0x18:
+                    # eret
+                    instruction.type = IT.Branch
+                    instruction.name = "eret"
+                case 0x38:
+                    # ei
+                    instruction.type = IT.GenericInt
+                    instruction.name = "ei"
+                case 0x39:
+                    # di
+                    instruction.type = IT.GenericInt
+                    instruction.name = "di"
+        case 0x102:
+            # cfc1
+            instruction.type = IT.GenericInt
+            instruction.name = "cfc1"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = fpu_get_c_name((opcode >> 11) & 0x1F)
+        case 0x202:
+            # cfc2
+            instruction.type = IT.GenericInt
+            instruction.name = "cfc2"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = vu0f_get_c_name((opcode >> 11) & 0x1F)
+        case 0x106:
+            # ctc1
+            instruction.type = IT.GenericInt
+            instruction.name = "ctc1"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = fpu_get_c_name((opcode >> 11) & 0x1F)
+        case 0x206:
+            # ctc2
+            instruction.type = IT.GenericInt
+            instruction.name = "ctc2"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = vu0f_get_c_name((opcode >> 11) & 0x1F)
+        case 0x008:
+            instruction.type = IT.GenericInt
+            instruction.name = "bc0"
+        case 0x108:
+            instruction.type = IT.GenericInt
+            instruction.name = "bc1"
+        case 0x208:
+            instruction.type = IT.GenericInt
+            instruction.name = "bc2"
+        case 0x110:
+            # FPU functions
+            # TODO
+            pass
+        case 0x114:
+            # cvt.s.w
+            instruction.type = IT.GenericInt
+            instruction.name = "cvt.s.w"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+        case 0x201:
+            # qmfc2
+            instruction.type = IT.GenericInt
+            instruction.name = "qmfc2"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = vu0f_get_name((opcode >> 11) & 0x1F)
+        case 0x205:
+            # qmtc2
+            instruction.type = IT.GenericInt
+            instruction.name = "qmtc2"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = vu0f_get_name((opcode >> 11) & 0x1F)
+
+    return instruction
+
+def decode_cop_s(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 21) & 0x1F
+    cop_id = ((opcode >> 26) & 0x3)
+
+    return instruction
+
+def decode_cop2_special(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 21) & 0x1F
+    cop_id = ((opcode >> 26) & 0x3)
+
+    return instruction
 
 def decode_special(opcode: int, addr: int) -> Instruction:
     instruction = Instruction()
@@ -1208,8 +1343,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.operand = opcode & 0xFFFF
         case 0x10 | 0x11 | 0x12 | 0x13:
             # cop instructions
-            # TODO
-            pass
+            return decode_cop(opcode, addr)
         case 0x14:
             # beql
             instruction.type = IT.Branch
