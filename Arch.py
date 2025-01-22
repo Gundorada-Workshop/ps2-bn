@@ -144,7 +144,8 @@ class EmotionEngine(Architecture):
             return 4
         
         instruction2 = None
-        if instruction1.type == InstructionType.Branch and instruction1.name != "eret":
+        if instruction1.type == InstructionType.Branch and \
+            instruction1.name not in ["eret", "syscall"]:
             if len(data) >= 8:
                 instruction2 = decode(data[4:8], addr + 4)
 
