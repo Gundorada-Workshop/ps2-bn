@@ -59,6 +59,7 @@ class EmotionEngine(Architecture):
                     result.add_branch(BranchType.UnconditionalBranch, instruction.branch_dest)
                 case "syscall":
                     result.add_branch(BranchType.SystemCall)
+                    result.branch_delay = 0
                 case "eret":
                     result.add_branch(BranchType.FunctionReturn)
                     result.branch_delay = 0

@@ -390,6 +390,15 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+
+            # psuedo-op (would need IL wrapper due to changed registers)
+            if instruction.reg2 == ZERO_REG:
+                instruction.name = "move"
+                instruction.reg2 = instruction.reg3
+                instruction.reg3 = None
+            elif instruction.reg3 == ZERO_REG:
+                instruction.name = "move"
+                instruction.reg3 = None
         case 0x22:
             # sub
             instruction.type = IT.GenericInt
@@ -470,6 +479,15 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+
+            # psuedo-op (would need IL wrapper due to changed registers)
+            if instruction.reg2 == ZERO_REG:
+                instruction.name = "dmove"
+                instruction.reg2 = instruction.reg3
+                instruction.reg3 = None
+            elif instruction.reg3 == ZERO_REG:
+                instruction.name = "dmove"
+                instruction.reg3 = None
         case 0x2E:
             # dsub
             instruction.type = IT.GenericInt
@@ -1465,6 +1483,11 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
+
+            # Psuedo-op
+            if instruction.reg2 == ZERO_REG:
+                instruction.name = "dli"
+                instruction.reg2 = None
         case 0x1A:
             # ldl
             instruction.type = IT.LoadStore
