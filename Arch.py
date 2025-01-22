@@ -10,9 +10,11 @@ from .ps2.vu0f.registers import registers as VU0FRegisters
 from .ps2.vu0f.registers import c_registers as VU0CRegisters
 from .ps2.cop0.registers import registers as COP0Registers
 from .ps2.cop0.registers import c_registers as COP0CRegisters
+from .ps2.intrinsics import Intrinsic
 from binaryninja.architecture import Architecture
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
 from binaryninja.enums import InstructionTextTokenType, BranchType
+from binaryninja import lowlevelil
 
 class EmotionEngine(Architecture):
     name             = "EmotionEngine"
@@ -131,7 +133,7 @@ class EmotionEngine(Architecture):
 
         return tokens, 4
     
-    def get_instruction_low_level_il(self, data: bytes, addr: int, il) -> Optional[int]:
+    def get_instruction_low_level_il(self, data: bytes, addr: int, il: 'lowlevelil.LowLevelILFunction') -> Optional[int]:
         if len(data) < 4:
             return None
         
@@ -157,3 +159,12 @@ class EmotionEngine(Architecture):
         
         instruction1.il_func(instruction1, addr, il)
         return length
+
+    def get_intrinsic_name(i: int) -> str:
+        match i:
+            case Intrinsic.DI:
+                return "_di"
+            case Intrinsic.EI:
+                return "_ei"
+            case _:
+                return f"Unknown intrinisic {i}"

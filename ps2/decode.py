@@ -140,10 +140,12 @@ def decode_cop(opcode: int, addr: int) -> Instruction:
                     # ei
                     instruction.type = IT.GenericInt
                     instruction.name = "ei"
+                    instruction.il_func = ee_func.ei
                 case 0x39:
                     # di
                     instruction.type = IT.GenericInt
                     instruction.name = "di"
+                    instruction.il_func = ee_func.di
         case 0x102:
             # cfc1
             instruction.type = IT.GenericInt
@@ -525,6 +527,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # add
             instruction.type = IT.GenericInt
             instruction.name = "add"
+            instruction.il_func = ee_func.add
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -532,6 +535,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # addu
             instruction.type = IT.GenericInt
             instruction.name = "addu"
+            instruction.il_func = ee_func.addu
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -605,6 +609,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dadd
             instruction.type = IT.GenericInt
             instruction.name = "dadd"
+            instruction.il_func = ee_func.dadd
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -612,6 +617,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # daddu
             instruction.type = IT.GenericInt
             instruction.name = "daddu"
+            instruction.il_func = ee_func.daddu
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -1470,6 +1476,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # addi
             instruction.type = IT.GenericInt
             instruction.name = "addi"
+            instruction.il_func = ee_func.addi
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1526,6 +1533,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # lui
             instruction.type = IT.GenericInt
             instruction.name = "lui"
+            instruction.il_func = ee_func.lui
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = opcode & 0xFFFF
         case 0x10 | 0x11 | 0x12 | 0x13:
@@ -1561,6 +1569,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # daddi
             instruction.type = IT.GenericInt
             instruction.name = "daddi"
+            instruction.il_func = ee_func.daddi
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1568,6 +1577,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # daddiu
             instruction.type = IT.GenericInt
             instruction.name = "daddiu"
+            instruction.il_func = ee_func.daddiu
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
