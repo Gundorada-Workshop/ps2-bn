@@ -535,15 +535,6 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
-
-            # psuedo-op (would need IL wrapper due to changed registers)
-            if instruction.reg2 == ZERO_REG:
-                instruction.name = "move"
-                instruction.reg2 = instruction.reg3
-                instruction.reg3 = None
-            elif instruction.reg3 == ZERO_REG:
-                instruction.name = "move"
-                instruction.reg3 = None
         case 0x22:
             # sub
             instruction.type = IT.GenericInt
@@ -624,15 +615,6 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
-
-            # psuedo-op (would need IL wrapper due to changed registers)
-            if instruction.reg2 == ZERO_REG:
-                instruction.name = "dmove"
-                instruction.reg2 = instruction.reg3
-                instruction.reg3 = None
-            elif instruction.reg3 == ZERO_REG:
-                instruction.name = "dmove"
-                instruction.reg3 = None
         case 0x2E:
             # dsub
             instruction.type = IT.GenericInt
@@ -1465,17 +1447,6 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
-
-            # psuedo-ops
-            if instruction.reg1 == ZERO_REG and \
-                instruction.reg2 == ZERO_REG:
-                instruction.name = "b"
-            elif instruction.reg2 == ZERO_REG:
-                instruction.name = "beqz"
-            elif instruction.reg1 == ZERO_REG:
-                # swap registers so $zero is last for easier handling later
-                instruction.name = "beqz"
-                instruction.reg1, instruction.reg2 = instruction.reg2, instruction.reg1
         case 0x05:
             # bne
             instruction.type = IT.Branch
@@ -1483,14 +1454,6 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
-
-            # psuedo-ops
-            if instruction.reg2 == ZERO_REG:
-                instruction.name = "bnez"
-            elif instruction.reg1 == ZERO_REG:
-                # swap registers so $zero is last for easier handling later
-                instruction.name = "bnez"
-                instruction.reg1, instruction.reg2 = instruction.reg2, instruction.reg1
         case 0x06:
             # blez
             instruction.type = IT.Branch
@@ -1517,11 +1480,6 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
-
-            # Psuedo-op
-            if instruction.reg2 == ZERO_REG:
-                instruction.name = "li"
-                instruction.reg2 = None
         case 0x0A:
             # slti
             instruction.type = IT.GenericInt
@@ -1579,14 +1537,6 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
-
-            # psuedo-ops
-            if instruction.reg2 == ZERO_REG:
-                instruction.name = "beqzl"
-            elif instruction.reg1 == ZERO_REG:
-                # swap registers so $zero is last for easier handling later
-                instruction.name = "beqzl"
-                instruction.reg1, instruction.reg2 = instruction.reg2, instruction.reg1
         case 0x15:
             # bnel
             instruction.type = IT.Branch
@@ -1594,14 +1544,6 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
-
-            # psuedo-ops
-            if instruction.reg2 == ZERO_REG:
-                instruction.name = "bnezl"
-            elif instruction.reg1 == ZERO_REG:
-                # swap registers so $zero is last for easier handling later
-                instruction.name = "bnezl"
-                instruction.reg1, instruction.reg2 = instruction.reg2, instruction.reg1
         case 0x16:
             # blezl
             instruction.type = IT.Branch
@@ -1628,11 +1570,6 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
-
-            # Psuedo-op
-            if instruction.reg2 == ZERO_REG:
-                instruction.name = "dli"
-                instruction.reg2 = None
         case 0x1A:
             # ldl
             instruction.type = IT.LoadStore
