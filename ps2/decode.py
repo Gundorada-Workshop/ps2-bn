@@ -16,7 +16,7 @@ def get_branch_dest(opcode: int, addr: int) -> int:
     offset += 4 # for branch delay slot
     return offset
 
-def _decode_special(opcode: int, addr: int) -> Instruction:
+def decode_special(opcode: int, addr: int) -> Instruction:
     instruction = Instruction()
     IT = InstructionType
 
@@ -332,6 +332,742 @@ def _decode_special(opcode: int, addr: int) -> Instruction:
             instruction.operand = (opcode >> 6) & 0x1F
     return instruction
 
+def decode_mmi(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = opcode & 0x3F
+
+    match op:
+        case 0x00:
+            # madd
+            instruction.type = IT.GenericInt
+            instruction.name = "madd"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x01:
+            # maddu
+            instruction.type = IT.GenericInt
+            instruction.name = "maddu"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x04:
+            # plzcw
+            instruction.type = IT.GenericInt
+            instruction.name = "plzcw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x08:
+            return decode_mmi0(opcode, addr)
+        case 0x09:
+            return decode_mmi2(opcode, addr)
+        case 0x10:
+            # mfhi1
+            instruction.type = IT.GenericInt
+            instruction.name = "mfhi1"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+        case 0x11:
+            # mthi1
+            instruction.type = IT.GenericInt
+            instruction.name = "mthi1"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x12:
+            # mflo1
+            instruction.type = IT.GenericInt
+            instruction.name = "mflo1"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+        case 0x13:
+            # mtlo1
+            instruction.type = IT.GenericInt
+            instruction.name = "mtlo1"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x18:
+            # mult1
+            instruction.type = IT.GenericInt
+            instruction.name = "mult1"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x19:
+            # multu1
+            instruction.type = IT.GenericInt
+            instruction.name = "multu1"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1A:
+            # div1
+            instruction.type = IT.GenericInt
+            instruction.name = "div1"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1B:
+            # divu1
+            instruction.type = IT.GenericInt
+            instruction.name = "divu1"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x20:
+            # madd1
+            instruction.type = IT.GenericInt
+            instruction.name = "madd1"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x21:
+            # maddu1
+            instruction.type = IT.GenericInt
+            instruction.name = "maddu1"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x28:
+            return decode_mmi1(opcode, addr)
+        case 0x29:
+            return decode_mmi3(opcode, addr)
+        case 0x30:
+            return decode_pmfhlfmt(opcode, addr)
+        case 0x31:
+            # pmthllw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmthllw"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F) 
+        case 0x34:
+            # psllh
+            instruction.type = IT.GenericInt
+            instruction.name = "psllh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F) 
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F) 
+        case 0x36:
+            # psrlh
+            instruction.type = IT.GenericInt
+            instruction.name = "psrlh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F) 
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F) 
+        case 0x37:
+            # psrah
+            instruction.type = IT.GenericInt
+            instruction.name = "psrah"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F) 
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F) 
+        case 0x3C:
+            # psllw
+            instruction.type = IT.GenericInt
+            instruction.name = "psllw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F) 
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F) 
+        case 0x3E:
+            # psrlw
+            instruction.type = IT.GenericInt
+            instruction.name = "psrlw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F) 
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F) 
+        case 0x3F:
+            # psraw
+            instruction.type = IT.GenericInt
+            instruction.name = "psraw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F) 
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F) 
+        
+    return instruction
+
+def decode_mmi0(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 6) & 0x1F
+
+    match op:
+        case 0x00:
+            # paddw
+            instruction.type = IT.GenericInt
+            instruction.name = "paddw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x01:
+            # psubw
+            instruction.type = IT.GenericInt
+            instruction.name = "psubw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x02:
+            # pcgtw
+            instruction.type = IT.GenericInt
+            instruction.name = "pcgtw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x03:
+            # pmaxw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmaxw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x04:
+            # paddh
+            instruction.type = IT.GenericInt
+            instruction.name = "paddh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x05:
+            # psubh
+            instruction.type = IT.GenericInt
+            instruction.name = "psubh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x06:
+            # pcgth
+            instruction.type = IT.GenericInt
+            instruction.name = "pcgth"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x07:
+            # pmaxh
+            instruction.type = IT.GenericInt
+            instruction.name = "pmaxh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x08:
+            # paddb
+            instruction.type = IT.GenericInt
+            instruction.name = "paddb"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x09:
+            # psubb
+            instruction.type = IT.GenericInt
+            instruction.name = "psubb"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x0A:
+            # pcgtb
+            instruction.type = IT.GenericInt
+            instruction.name = "pcgtb"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x10:
+            # paddsw
+            instruction.type = IT.GenericInt
+            instruction.name = "paddsw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x11:
+            # psubsw
+            instruction.type = IT.GenericInt
+            instruction.name = "psubsw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x12:
+            # pextlw
+            instruction.type = IT.GenericInt
+            instruction.name = "pextlw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x13:
+            # ppacw
+            instruction.type = IT.GenericInt
+            instruction.name = "ppacw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x14:
+            # paddsh
+            instruction.type = IT.GenericInt
+            instruction.name = "paddsh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x15:
+            # psubsh
+            instruction.type = IT.GenericInt
+            instruction.name = "psubsh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x16:
+            # pextlh
+            instruction.type = IT.GenericInt
+            instruction.name = "pextlh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x17:
+            # ppach
+            instruction.type = IT.GenericInt
+            instruction.name = "ppach"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x18:
+            # paddsb
+            instruction.type = IT.GenericInt
+            instruction.name = "paddsb"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x19:
+            # psubsb
+            instruction.type = IT.GenericInt
+            instruction.name = "psubsb"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1A:
+            # pextlb
+            instruction.type = IT.GenericInt
+            instruction.name = "pextlb"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1B:
+            # ppacb
+            instruction.type = IT.GenericInt
+            instruction.name = "ppacb"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1E:
+            # pext5
+            instruction.type = IT.GenericInt
+            instruction.name = "pext5"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+        case 0x1F:
+            # ppac5
+            instruction.type = IT.GenericInt
+            instruction.name = "ppac5"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+
+    return instruction
+
+def decode_mmi1(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 6) & 0x1F
+
+    match op:
+        case 0x01:
+            # pabsw
+            instruction.type = IT.GenericInt
+            instruction.name = "pabsw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+        case 0x02:
+            # pceqw
+            instruction.type = IT.GenericInt
+            instruction.name = "pceqw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x03:
+            # pminw
+            instruction.type = IT.GenericInt
+            instruction.name = "pminw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x04:
+            # padsbh
+            instruction.type = IT.GenericInt
+            instruction.name = "padsbh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x05:
+            # pabsh
+            instruction.type = IT.GenericInt
+            instruction.name = "pabsh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+        case 0x06:
+            # pceqh
+            instruction.type = IT.GenericInt
+            instruction.name = "pceqh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x07:
+            # pminh
+            instruction.type = IT.GenericInt
+            instruction.name = "pminh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x0A:
+            # pceqb
+            instruction.type = IT.GenericInt
+            instruction.name = "pceqb"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x10:
+            # padduw
+            instruction.type = IT.GenericInt
+            instruction.name = "padduw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x11:
+            # psubuw
+            instruction.type = IT.GenericInt
+            instruction.name = "psubuw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x12:
+            # pextuw
+            instruction.type = IT.GenericInt
+            instruction.name = "pextuw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x14:
+            # padduh
+            instruction.type = IT.GenericInt
+            instruction.name = "padduh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x15:
+            # psubuh
+            instruction.type = IT.GenericInt
+            instruction.name = "psubuh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x16:
+            # pextuh
+            instruction.type = IT.GenericInt
+            instruction.name = "pextuh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x18:
+            # paddub
+            instruction.type = IT.GenericInt
+            instruction.name = "paddub"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x19:
+            # psubub
+            instruction.type = IT.GenericInt
+            instruction.name = "psubub"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1A:
+            # pextub
+            instruction.type = IT.GenericInt
+            instruction.name = "pextub"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1B:
+            # qfsrv
+            instruction.type = IT.GenericInt
+            instruction.name = "qfsrv"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+
+    return instruction
+
+def decode_mmi2(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 6) & 0x1F
+
+    match op:
+        case 0x00:
+            # pmaddw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmaddw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x02:
+            # psllvw
+            instruction.type = IT.GenericInt
+            instruction.name = "psllvw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x03:
+            # psrlvw
+            instruction.type = IT.GenericInt
+            instruction.name = "psrlvw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x04:
+            # pmsubw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmsubw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x08:
+            # pmfhi
+            instruction.type = IT.GenericInt
+            instruction.name = "pmfhi"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+        case 0x09:
+            # pmflo
+            instruction.type = IT.GenericInt
+            instruction.name = "pmflo"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+        case 0x0A:
+            # pinth
+            instruction.type = IT.GenericInt
+            instruction.name = "pinth"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0xC:
+            # pmultw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmultw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0xD:
+            # pdivw
+            instruction.type = IT.GenericInt
+            instruction.name = "pdivw"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0xE:
+            # pcpyld
+            instruction.type = IT.GenericInt
+            instruction.name = "pcpyld"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x10:
+            # pmaddh
+            instruction.type = IT.GenericInt
+            instruction.name = "pmaddh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x11:
+            # phmadh
+            instruction.type = IT.GenericInt
+            instruction.name = "phmadh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x12:
+            # pand
+            instruction.type = IT.GenericInt
+            instruction.name = "pand"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x13:
+            # pxor
+            instruction.type = IT.GenericInt
+            instruction.name = "pxor"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x14:
+            # pmsubh
+            instruction.type = IT.GenericInt
+            instruction.name = "pmsubh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x15:
+            # phmsbh
+            instruction.type = IT.GenericInt
+            instruction.name = "phmsbh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1A:
+            # pexeh
+            instruction.type = IT.GenericInt
+            instruction.name = "pexeh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+        case 0x1B:
+            # prevh
+            instruction.type = IT.GenericInt
+            instruction.name = "prevh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+        case 0x1C:
+            # pmulth
+            instruction.type = IT.GenericInt
+            instruction.name = "pmulth"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1D:
+            # pext5
+            instruction.type = IT.GenericInt
+            instruction.name = "pdivbw"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1E:
+            # pexew
+            instruction.type = IT.GenericInt
+            instruction.name = "pexew"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+        case 0x1F:
+            # prot3w
+            instruction.type = IT.GenericInt
+            instruction.name = "prot3w"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+
+    return instruction
+
+def decode_mmi3(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 6) & 0x1F
+
+    match op:
+        case 0x00:
+            # pmadduw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmadduw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x03:
+            # psravw
+            instruction.type = IT.GenericInt
+            instruction.name = "psravw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x08:
+            # pmthi
+            instruction.type = IT.GenericInt
+            instruction.name = "pmthi"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x09:
+            # pmtlo
+            instruction.type = IT.GenericInt
+            instruction.name = "pmtlo"
+            instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x0A:
+            # pinteh
+            instruction.type = IT.GenericInt
+            instruction.name = "pinteh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0xC:
+            # pmultuw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmultuw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0xD:
+            # pdivuw
+            instruction.type = IT.GenericInt
+            instruction.name = "pdivuw"
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0xE:
+            # pcpyud
+            instruction.type = IT.GenericInt
+            instruction.name = "pcpyud"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x12:
+            # por
+            instruction.type = IT.GenericInt
+            instruction.name = "por"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x13:
+            # pnor
+            instruction.type = IT.GenericInt
+            instruction.name = "pnor"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+        case 0x1A:
+            # pexch
+            instruction.type = IT.GenericInt
+            instruction.name = "pexch"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+        case 0x1B:
+            # pcpyh
+            instruction.type = IT.GenericInt
+            instruction.name = "pcpyh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+        case 0x1E:
+            # pexcw
+            instruction.type = IT.GenericInt
+            instruction.name = "pexew"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+
+    return instruction
+
+def decode_pmfhlfmt(opcode: int, addr: int) -> Instruction:
+    instruction = Instruction()
+    IT = InstructionType
+    op = (opcode >> 6) & 0x1F
+
+    match op:
+        case 0x00:
+            # pmfhllw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmfhllw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+        case 0x01:
+            # pmfhluw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmfhluw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+        case 0x02:
+            # pmfhlslw
+            instruction.type = IT.GenericInt
+            instruction.name = "pmfhlslw"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+        case 0x03:
+            # pmfhllh
+            instruction.type = IT.GenericInt
+            instruction.name = "pmfhllh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+        case 0x04:
+            # pmfhlsh
+            instruction.type = IT.GenericInt
+            instruction.name = "pmfhlsh"
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+
+    return instruction
+
 def decode(data: bytes, addr: int) -> Instruction:
     opcode = int.from_bytes(data, "little")
     op = opcode >> 26
@@ -340,7 +1076,7 @@ def decode(data: bytes, addr: int) -> Instruction:
 
     match op:
         case 0x00:
-            return _decode_special(opcode, addr)
+            return decode_special(opcode, addr)
         case 0x01:
             # TODO
             # regimm
@@ -545,9 +1281,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
         case 0x1C:
-            # mmi
-            # TODO
-            pass
+            return decode_mmi(opcode, addr)
         case 0x1E:
             # lq
             instruction.type = IT.LoadStore
