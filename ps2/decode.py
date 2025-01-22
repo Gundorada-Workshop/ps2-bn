@@ -179,8 +179,7 @@ def decode_cop(opcode: int, addr: int) -> Instruction:
             instruction.name = "bc2"
         case 0x110:
             # FPU functions
-            # TODO
-            pass
+            return decode_cop_s(opcode, addr)
         case 0x114:
             # cvt.s.w
             instruction.type = IT.GenericInt
@@ -205,8 +204,154 @@ def decode_cop(opcode: int, addr: int) -> Instruction:
 def decode_cop_s(opcode: int, addr: int) -> Instruction:
     instruction = Instruction()
     IT = InstructionType
-    op = (opcode >> 21) & 0x1F
-    cop_id = ((opcode >> 26) & 0x3)
+    op = opcode & 0x3F
+
+    match op:
+        case 0x0:
+            # add.s
+            instruction.type = IT.GenericInt
+            instruction.name = "add.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x1:
+            # sub.s
+            instruction.type = IT.GenericInt
+            instruction.name = "sub.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x2:
+            # mul.s
+            instruction.type = IT.GenericInt
+            instruction.name = "mul.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x3:
+            # div.s
+            instruction.type = IT.GenericInt
+            instruction.name = "div.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x4:
+            # sqrt.s
+            instruction.type = IT.GenericInt
+            instruction.name = "sqrt.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x5:
+            # abs.s
+            instruction.type = IT.GenericInt
+            instruction.name = "abs.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+        case 0x6:
+            # mov.s
+            instruction.type = IT.GenericInt
+            instruction.name = "mov.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+        case 0x7:
+            # neg.s
+            instruction.type = IT.GenericInt
+            instruction.name = "neg.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+        case 0x16:
+            # rsqrt.s
+            instruction.type = IT.GenericInt
+            instruction.name = "rsqrt.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x18:
+            # adda.s
+            instruction.type = IT.GenericInt
+            instruction.name = "adda.s"
+            instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x19:
+            # suba.s
+            instruction.type = IT.GenericInt
+            instruction.name = "suba.s"
+            instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x1A:
+            # mula.s
+            instruction.type = IT.GenericInt
+            instruction.name = "mula.s"
+            instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x1C:
+            # madd.s
+            instruction.type = IT.GenericInt
+            instruction.name = "madd.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x1D:
+            # msub.s
+            instruction.type = IT.GenericInt
+            instruction.name = "msub.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x1E:
+            # madda.s
+            instruction.type = IT.GenericInt
+            instruction.name = "madda.s"
+            instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x1F:
+            # msuba.s
+            instruction.type = IT.GenericInt
+            instruction.name = "msuba.s"
+            instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x24:
+            # cvt.w.s
+            instruction.type = IT.GenericInt
+            instruction.name = "cvt.w.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+        case 0x28:
+            # max.s
+            instruction.type = IT.GenericInt
+            instruction.name = "max.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x29:
+            # min.s
+            instruction.type = IT.GenericInt
+            instruction.name = "min.s"
+            instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg3 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x30:
+            # c.f.s
+            instruction.type = IT.GenericInt
+            instruction.name = "c.f.s"
+        case 0x32:
+            # c.eq.s
+            instruction.type = IT.GenericInt
+            instruction.name = "c.eq.s"
+            instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x34:
+            # c.lt.s
+            instruction.type = IT.GenericInt
+            instruction.name = "c.lt.s"
+            instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
+        case 0x36:
+            # c.eq.s
+            instruction.type = IT.GenericInt
+            instruction.name = "c.le.s"
+            instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
 
     return instruction
 

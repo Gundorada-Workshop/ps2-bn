@@ -1,6 +1,8 @@
 from binaryninja.architecture import RegisterName
 from typing import List, Tuple
 
+ACC_REGISTER = RegisterName("$acc")
+
 # name, size
 registers: List[Tuple[RegisterName, int]] = [
     (RegisterName("$f0"), 4),   # 0
@@ -35,6 +37,7 @@ registers: List[Tuple[RegisterName, int]] = [
     (RegisterName("$f29"), 4),  # 0
     (RegisterName("$f30"), 4),  # 0
     (RegisterName("$f31"), 4),  # 0
+    (ACC_REGISTER, 4),
 ]
 
 def get_name(index: int) -> RegisterName:
