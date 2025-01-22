@@ -118,7 +118,7 @@ class EmotionEngine(Architecture):
             case IT.LoadStore:
                 tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg1))
                 tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                str_func = hex if instruction.operand >= 10 else str
+                str_func = hex if abs(instruction.operand) >= 10 else str
                 tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str_func(instruction.operand)))
                 tokens.append(InstructionTextToken(InstructionTextTokenType.BeginMemoryOperandToken, "("))
                 tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg2))
