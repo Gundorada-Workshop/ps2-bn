@@ -1,7 +1,7 @@
 from .registers import registers as gpr
 from .registers import ZERO_REG
 from ..instruction import Instruction
-from ..intrinsics import Intrinsic
+from ..intrinsics import PS2Intrinsic
 from binaryninja import lowlevelil
 
 def add(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
@@ -58,14 +58,10 @@ def daddu(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunctio
     _addu(instruction, addr, il, 8)
 
 def di(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
-    il.append(il.nop())
-    # Broken in Python?
-    #il.append(il.intrinsic([], Intrinsic.DI, []))
+    il.append(il.intrinsic([], PS2Intrinsic.DI, []))
 
 def ei(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
-    il.append(il.nop())
-    # Broken in Python?
-    #il.append(il.intrinsic([], Intrinsic.EI, []))
+    il.append(il.intrinsic([], PS2Intrinsic.EI, []))
 
 def jr(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
     il.append(

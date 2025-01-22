@@ -10,11 +10,11 @@ from .ps2.vu0f.registers import registers as VU0FRegisters
 from .ps2.vu0f.registers import c_registers as VU0CRegisters
 from .ps2.cop0.registers import registers as COP0Registers
 from .ps2.cop0.registers import c_registers as COP0CRegisters
-from .ps2.intrinsics import Intrinsic
+from .ps2.intrinsics import PS2Intrinsic
 from binaryninja.architecture import Architecture
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
 from binaryninja.enums import InstructionTextTokenType, BranchType
-from binaryninja import lowlevelil
+from binaryninja import lowlevelil, IntrinsicInfo, Type
 
 class EmotionEngine(Architecture):
     name             = "EmotionEngine"
@@ -30,6 +30,10 @@ class EmotionEngine(Architecture):
            {name: RegisterInfo(name, size) for name, size in FPUCRegisters} | \
            {name: RegisterInfo(name, size) for name, size in VU0FRegisters} | \
            {name: RegisterInfo(name, size) for name, size in VU0CRegisters} 
+    intrinsics = {
+        PS2Intrinsic.DI: IntrinsicInfo([],  []),
+        PS2Intrinsic.EI: IntrinsicInfo([],  []),
+    }
 
     stack_pointer = SP_REG
     link_register = RA_REG
@@ -159,12 +163,3 @@ class EmotionEngine(Architecture):
         
         instruction1.il_func(instruction1, addr, il)
         return length
-
-    def get_intrinsic_name(i: int) -> str:
-        match i:
-            case Intrinsic.DI:
-                return "_di"
-            case Intrinsic.EI:
-                return "_ei"
-            case _:
-                return f"Unknown intrinisic {i}"
