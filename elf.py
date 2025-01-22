@@ -18,6 +18,17 @@ class FormatType(IntEnum):
     Format64  = 0x2
 
 # 32 bit only
+class ProgramHeaderOffsets(IntEnum):
+    Type            = 0x00
+    Offset          = 0x04
+    VirtualAddress  = 0x08
+    PhysicalAddress = 0x0C
+    FileSize        = 0x10
+    MemorySize      = 0x14
+    Flags           = 0x18
+    Alignment       = 0x1C
+
+# 32 bit only
 class HeaderOffsets(IntEnum):
     Magic                    = 0x00
     Class                    = 0x04
@@ -96,9 +107,9 @@ class SegmentType(IntEnum):
     ThreadLocalStorage = 0x07
 
 class SegmentFlags(IntEnum):
-    Executable = 0x1
-    Writeable  = 0x2
-    Readable   = 0x3
+    Executable = 1 << 0
+    Writeable  = 1 << 1
+    Readable   = 1 << 2
 
 class SectionType(IntEnum):
     Null                     = 0x00
@@ -132,15 +143,14 @@ class SectionAttributeFlags(IntEnum):
     ThreadLocalData = 1 << 10
 
 class ProgramHeader:
-    type: int
-    flags: int
+    type: SegmentType
+    flags: SegmentFlags
     offset: int
     virtual_address: int
     physical_address: int
     file_size: int
     memory_size: int
     alignment: int
-
 
 class SectionHeader:
     name: str
@@ -191,11 +201,42 @@ def read_elf_header(data: BinaryView) -> Optional[FileHeader]:
     arch   = data.read(HeaderOffsets.Machine, 2)
     entry  = data.read(HeaderOffsets.Entry, 4)
 
+    program_header_offset = data.read(HeaderOffsets.ProgramHeaderOffset, 4)
+    program_header_count  = data.read(HeaderOffsets.ProgramHeaderCount, 2)
+    program_header_size   = data.read(HeaderOffsets.ProgramHeaderSize, 2)
+
     header.endian      = int.from_bytes(endian, 'little')
     header.abi         = int.from_bytes(abi,    'little')
     header.arch        = int.from_bytes(arch,   'little')
     header.entry_point = int.from_bytes(entry,  'little')
 
-    header.flags  = int.from_bytes(flags,  'little')
+    header.program_header_offset = int.from_bytes(program_header_offset, 'little')
+    header.program_header_count  = int.from_bytes(program_header_count, 'little')
+    header.program_header_size   = int.from_bytes(program_header_size, 'little')
+
+    header.flags  = int.from_bytes(flags, 'little')
 
     return header
+
+def read_program_header(data: BinaryView, start: int) -> Optional[ProgramHeader]:
+    header_type      = data.read(start + ProgramHeaderOffsets.Type, 4)
+    offset           = data.read(start + ProgramHeaderOffsets.Offset, 4)
+    virtual_address  = data.read(start + ProgramHeaderOffsets.VirtualAddress, 4)
+    physical_address = data.read(start + ProgramHeaderOffsets.PhysicalAddress, 4)
+    file_size        = data.read(start + ProgramHeaderOffsets.FileSize, 4)
+    memory_size      = data.read(start + ProgramHeaderOffsets.MemorySize, 4)
+    flags            = data.read(start + ProgramHeaderOffsets.Flags, 4)
+    alignment        = data.read(start + ProgramHeaderOffsets.Alignment, 4)
+
+    program_header = ProgramHeader()
+
+    program_header.type             = int.from_bytes(header_type, 'little')
+    program_header.offset           = int.from_bytes(offset, 'little')
+    program_header.virtual_address  = int.from_bytes(virtual_address, 'little')
+    program_header.physical_address = int.from_bytes(physical_address, 'little')
+    program_header.file_size        = int.from_bytes(file_size, 'little')
+    program_header.memory_size      = int.from_bytes(memory_size, 'little')
+    program_header.flags            = int.from_bytes(flags, 'little')
+    program_header.alignment        = int.from_bytes(alignment, 'little')
+
+    return program_header
