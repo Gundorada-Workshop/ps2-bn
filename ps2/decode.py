@@ -1453,6 +1453,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # beq
             instruction.type = IT.Branch
             instruction.name = "beq"
+            instruction.il_func = ee_func.beq
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
@@ -1460,6 +1461,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # bne
             instruction.type = IT.Branch
             instruction.name = "bne"
+            instruction.il_func = ee_func.bne
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)

@@ -153,7 +153,7 @@ class EmotionEngine(Architecture):
         if instruction2 is not None:
             instruction2.arch = EmotionEngine
             if instruction2.il_func is not None:
-                instruction2.il_func(instruction2, addr, il)
+                instruction2.il_func(instruction2, addr + 4, il)
                 length += 4
         
         instruction1.il_func(instruction1, addr, il)
