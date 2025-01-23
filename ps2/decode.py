@@ -1439,6 +1439,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # j
             instruction.type = IT.Branch
             instruction.name = "j"
+            instruction.il_func = ee_func.j
             offset = (opcode & 0x3FFFFFF) << 2
             offset += (addr + 4) & 0xF0000000
             instruction.branch_dest = offset
@@ -1446,6 +1447,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # jal
             instruction.type = IT.Branch
             instruction.name = "jal"
+            instruction.il_func = ee_func.jal
             offset = (opcode & 0x3FFFFFF) << 2
             offset += (addr + 4) & 0xF0000000
             instruction.branch_dest = offset

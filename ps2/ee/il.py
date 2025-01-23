@@ -138,6 +138,18 @@ def di(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def ei(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.intrinsic([], PS2Intrinsic.EI, []))
 
+def j(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _unconditional_branch(instruction, addr, il)
+
+def jal(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    il.append(
+        il.call(
+            il.const(
+                4, instruction.branch_dest
+            )
+        )
+    )
+    
 def jr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(
         il.jump(
