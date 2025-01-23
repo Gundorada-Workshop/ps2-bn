@@ -1,3 +1,3 @@
 class PS2Intrinsic:
-    DI = "_di"
-    EI = "_ei"
+    DI = "_DisableInterrupts"
+    EI = "_EnableInterrupts"

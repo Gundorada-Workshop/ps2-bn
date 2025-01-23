@@ -2,10 +2,10 @@ from .ee import il as ee_func
 from .ee.registers import ZERO_REG
 from .ee.registers import get_name as ee_get_name
 from .fpu.registers import get_name as fpu_get_name
-from .vu0f.registers import get_name as vu0f_get_name
+from .vu0.registers import get_f_name as vu0f_get_name
 from .cop0.registers import get_name as cop0_get_name
 from .fpu.registers import get_c_name as fpu_get_c_name
-from .vu0f.registers import get_c_name as vu0f_get_c_name
+from .vu0.registers import get_c_name as vu0f_get_c_name
 from .cop0.registers import get_c_name as cop0_get_c_name
 from .instruction import Instruction, InstructionType
 

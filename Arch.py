@@ -6,8 +6,9 @@ from .ps2.ee.registers import registers as EERegisters
 from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG, RA_REG, SP_REG, ZERO_REG
 from .ps2.fpu.registers import registers as FPURegisters
 from .ps2.fpu.registers import c_registers as FPUCRegisters
-from .ps2.vu0f.registers import registers as VU0FRegisters
-from .ps2.vu0f.registers import c_registers as VU0CRegisters
+from .ps2.vu0.registers import i_registers as VU0IRegisters
+from .ps2.vu0.registers import f_registers as VU0FRegisters
+from .ps2.vu0.registers import c_registers as VU0CRegisters
 from .ps2.cop0.registers import registers as COP0Registers
 from .ps2.cop0.registers import c_registers as COP0CRegisters
 from .ps2.intrinsics import PS2Intrinsic
@@ -23,13 +24,7 @@ class EmotionEngine(Architecture):
     instr_alignment  = 4
     max_instr_length = 8 # Branch + Branch delay slot
 
-    regs = {name: RegisterInfo(name, size) for name, size in EERegisters} | \
-           {name: RegisterInfo(name, size) for name, size in COP0Registers} | \
-           {name: RegisterInfo(name, size) for name, size in COP0CRegisters} | \
-           {name: RegisterInfo(name, size) for name, size in FPURegisters} | \
-           {name: RegisterInfo(name, size) for name, size in FPUCRegisters} | \
-           {name: RegisterInfo(name, size) for name, size in VU0FRegisters} | \
-           {name: RegisterInfo(name, size) for name, size in VU0CRegisters} 
+    regs = EERegisters | COP0Registers | COP0CRegisters | FPURegisters | FPUCRegisters | VU0IRegisters | VU0FRegisters | VU0CRegisters
     intrinsics = {
         PS2Intrinsic.DI: IntrinsicInfo([],  []),
         PS2Intrinsic.EI: IntrinsicInfo([],  []),

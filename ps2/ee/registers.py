@@ -1,5 +1,5 @@
-from binaryninja.architecture import RegisterName
-from typing import List, Tuple
+from binaryninja.architecture import RegisterInfo, RegisterName
+from typing import Dict, List, Tuple
 
 ZERO_REG = RegisterName("$zero")
 SP_REG = RegisterName("$sp")
@@ -10,7 +10,7 @@ PC_REG = RegisterName("$pc")
 SA_REG = RegisterName("$sa")
 
 # name, size
-registers: List[Tuple[RegisterName, int]] = [
+register_params: List[Tuple[RegisterName, int]] = [
     (ZERO_REG, 16),    # 0
     (RegisterName("$at"), 16),      # 1
     (RegisterName("$v0"), 16),      # 2
@@ -48,9 +48,12 @@ registers: List[Tuple[RegisterName, int]] = [
     (PC_REG, 4),                    # special
     (SA_REG, 8),                    # special
 ]
+registers: Dict[RegisterName, RegisterInfo] = {
+    name: RegisterInfo(name, size) for name, size in register_params
+}
 
 def get_name(index: int) -> RegisterName:
     if not 0 <= index < 32:
-        raise ValueError(f"Invalid EE GPR register index {index}")
+        raise IndexError(f"Invalid EE GPR register index {index}")
 
-    return registers[index][0]
+    return register_params[index][0]

@@ -1,30 +1,31 @@
-from typing import List, Tuple
-from binaryninja.architecture import RegisterName
+from typing import Dict, List, Tuple
+from binaryninja.architecture import RegisterInfo, RegisterName
 
 # name, size
 # TODO
-registers: List[Tuple[RegisterName, int]] = [
-    (RegisterName(f"$COPZ{i}"), 4) for i in range(0, 32)
-]
+register_names: List[RegisterName] = [RegisterName(f"COPZ{i}") for i in range(32)]
+registers: Dict[RegisterName, RegisterInfo] = {
+    name: RegisterInfo(name, 4) for name in register_names
+}
 
 def get_name(index: int) -> RegisterName:
     if not 0 <= index < 32:
-        raise ValueError(f"Invalid COP0 register index {index}")
+        raise IndexError(f"Invalid COP0 register index {index}")
 
-    return registers[index][0]
+    return register_names[index]
 
 # name, size
 # TODO
-c_registers: List[Tuple[RegisterName, int]] = [
-    (RegisterName(f"$COPZCR{i}"), 4) for i in range(0, 32)
-]
+c_register_names: List[RegisterName] = [RegisterName(f"COPCRZ{i}") for i in range(32)]
+c_registers: Dict[RegisterName, RegisterInfo] = {
+    name: RegisterInfo(name, 4) for name in c_register_names
+}
 
 CONDITION_REG = RegisterName("COP0_CONDITION")
-
-c_registers.append((CONDITION_REG, 4))
+c_registers[CONDITION_REG] = RegisterInfo(CONDITION_REG, 4)
 
 def get_c_name(index: int) -> RegisterName:
     if not 0 <= index < 32:
-        raise ValueError(f"Invalid COP0 Control register index {index}")
+        raise IndexError(f"Invalid COP0 Control register index {index}")
 
-    return registers[index][0]
+    return c_register_names[index]
