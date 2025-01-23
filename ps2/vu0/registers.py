@@ -37,7 +37,7 @@ def get_subregister_name(index: int, component: int):
 for i in range(len(f_registers)):
     for component in range(0, 4):
         name = get_subregister_name(i, component)
-        f_registers[name] = RegisterInfo(name, 4, i * 4)
+        f_registers[name] = RegisterInfo(get_f_name(i), 4, i * 4)
 
 # TODO
 c_register_names = [RegisterName(f"$vcr{i}") for i in range(32)]
