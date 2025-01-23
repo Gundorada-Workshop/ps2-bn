@@ -598,16 +598,16 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "slt"
             instruction.il_func = ee_func.slt
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
-            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
-            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 16) & 0x1F)
         case 0x2B:
             # sltu
             instruction.type = IT.GenericInt
             instruction.name = "sltu"
             instruction.il_func = ee_func.sltu
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
-            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
-            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 16) & 0x1F)
         case 0x2C:
             # dadd
             instruction.type = IT.GenericInt

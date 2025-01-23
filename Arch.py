@@ -108,13 +108,13 @@ class EmotionEngine(Architecture):
 
                     tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, operand))
             case IT.Branch:
-                if instruction.reg1 is not None and instruction.reg1 != ZERO_REG:
+                if instruction.reg1 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg1))
-                if instruction.reg2 is not None and instruction.reg2 != ZERO_REG:
+                if instruction.reg2 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
                     tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg2))
                 if instruction.branch_dest is not None:
-                    if instruction.reg1 is not None and instruction.reg1 != ZERO_REG:
+                    if instruction.reg1 is not None:
                         tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
                     tokens.append(InstructionTextToken(InstructionTextTokenType.PossibleAddressToken, hex(instruction.branch_dest)))
             case IT.LoadStore:
