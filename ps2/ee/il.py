@@ -2,6 +2,7 @@ from .registers import registers as gpr
 from .registers import ZERO_REG
 from ..instruction import Instruction
 from ..intrinsics import PS2Intrinsic
+from ...util import Functor
 from binaryninja import lowlevelil
 
 def add(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
@@ -69,6 +70,24 @@ def jr(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction')
             il.reg(4, instruction.reg1)
         )
     )
+
+def _load(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction', size: int, sign_extend: bool) -> None:
+    value = il.load(size, il.add(4, il.reg(4, instruction.reg2), il.const(4, instruction.operand)))
+    if sign_extend:
+        value = il.sign_extend(8, value)
+
+    # lb, lh, lw, ld write first 64-bits of register; lq writes all 128-bits
+    reg_size = max(8, size)
+    il.append(il.set_reg(reg_size, instruction.reg1, value))
+
+lb  = lambda instruction, addr, il: _load(instruction, addr, il, 1, sign_extend=True)
+lbu = lambda instruction, addr, il: _load(instruction, addr, il, 1, sign_extend=False)
+ld  = lambda instruction, addr, il: _load(instruction, addr, il, 8, sign_extend=False)
+lh  = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=True)
+lhu = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=False)
+lq  = lambda instruction, addr, il: _load(instruction, addr, il, 16, sign_extend=False)
+lw  = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=True)
+lwu = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=False)
 
 def lui(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
     val = il.const(4, instruction.operand << 16)

@@ -450,6 +450,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # syscall
             instruction.type = IT.Branch
             instruction.name = "syscall"
+            instruction.il_func = ee_func.syscall
         case 0x0D:
             # break
             instruction.type = IT.GenericInt
@@ -1601,6 +1602,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # lq
             instruction.type = IT.LoadStore
             instruction.name = "lq"
+            instruction.il_func = ee_func.lq
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1615,13 +1617,15 @@ def decode(data: bytes, addr: int) -> Instruction:
             # lb
             instruction.type = IT.LoadStore
             instruction.name = "lb"
+            instruction.il_func = ee_func.lb
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
         case 0x21:
             # lh
             instruction.type = IT.LoadStore
-            instruction.name = "sq"
+            instruction.name = "lh"
+            instruction.il_func = ee_func.lh
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1636,6 +1640,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # lw
             instruction.type = IT.LoadStore
             instruction.name = "lw"
+            instruction.il_func = ee_func.lw
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1643,6 +1648,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # lbu
             instruction.type = IT.LoadStore
             instruction.name = "lbu"
+            instruction.il_func = ee_func.lbu
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1650,6 +1656,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # lhu
             instruction.type = IT.LoadStore
             instruction.name = "lhu"
+            instruction.il_func = ee_func.lhu
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1664,6 +1671,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # lwu
             instruction.type = IT.LoadStore
             instruction.name = "lwu"
+            instruction.il_func = ee_func.lwu
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1744,6 +1752,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # ld
             instruction.type = IT.LoadStore
             instruction.name = "ld"
+            instruction.il_func = ee_func.ld
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
