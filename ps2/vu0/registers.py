@@ -42,7 +42,7 @@ for i in range(len(f_registers)):
 # TODO
 c_register_names = [RegisterName(f"$vcr{i}") for i in range(32)]
 c_registers: Dict[RegisterName, RegisterInfo] = {
-    name: RegisterInfo(name, 2) for name in c_register_names
+    name: RegisterInfo(name, 4) for name in c_register_names
 }
 
 CONDITION_REG = RegisterName("COP2_CONDITION")
