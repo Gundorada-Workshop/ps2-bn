@@ -100,5 +100,21 @@ def sll(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction'
     val = il.shift_left(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
     il.append(il.set_reg(4, instruction.reg1, val))
 
+def _store(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction', size: int) -> None:
+    value = None
+    if instruction.reg1 == ZERO_REG:
+        value = il.const(size, 0)
+    else:
+        value = il.reg(size, instruction.reg1)
+    addr = il.add(4, il.reg(4, instruction.reg2), il.const(4, instruction.operand))
+    
+    il.append(il.store(size, addr, value))
+
+sb  = lambda instruction, addr, il: _store(instruction, addr, il, 1)
+sd  = lambda instruction, addr, il: _store(instruction, addr, il, 8)
+sh  = lambda instruction, addr, il: _store(instruction, addr, il, 4)
+sq  = lambda instruction, addr, il: _store(instruction, addr, il, 16)
+sw  = lambda instruction, addr, il: _store(instruction, addr, il, 4)
+
 def syscall(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
     il.append(il.system_call())

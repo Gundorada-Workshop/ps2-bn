@@ -1610,6 +1610,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # sq
             instruction.type = IT.LoadStore
             instruction.name = "sq"
+            instruction.il_func = ee_func.sq
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1679,6 +1680,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # sb
             instruction.type = IT.LoadStore
             instruction.name = "sb"
+            instruction.il_func = ee_func.sb
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1686,6 +1688,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # sh
             instruction.type = IT.LoadStore
             instruction.name = "sh"
+            instruction.il_func = ee_func.sh
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1700,6 +1703,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # sw
             instruction.type = IT.LoadStore
             instruction.name = "sw"
+            instruction.il_func = ee_func.sw
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1774,6 +1778,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # sd
             instruction.type = IT.LoadStore
             instruction.name = "sd"
+            instruction.il_func = ee_func.sd
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
