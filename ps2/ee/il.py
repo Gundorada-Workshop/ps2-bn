@@ -100,6 +100,34 @@ def sll(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction'
     val = il.shift_left(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
     il.append(il.set_reg(4, instruction.reg1, val))
 
+def slt(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
+    val = il.reg(4, instruction.reg3)
+    source = il.reg(4, instruction.reg2)
+    expr = il.compare_signed_less_than(4, source, val)
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
+
+def slti(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
+    val = il.const(4, instruction.operand)
+    source = il.reg(4, instruction.reg2)
+    expr = il.compare_signed_less_than(4, source, val)
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
+
+def sltiu(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
+    val = il.const(4, instruction.operand)
+    source = il.reg(4, instruction.reg2)
+    expr = il.compare_unsigned_less_than(4, source, val)
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
+
+def sltu(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction') -> None:
+    val = il.reg(4, instruction.reg3)
+    source = il.reg(4, instruction.reg2)
+    expr = il.compare_unsigned_less_than(4, source, val)
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
+
 def _store(instruction: Instruction, addr: int, il: 'lowlevelil.LowLevelILFunction', size: int) -> None:
     value = None
     if instruction.reg1 == ZERO_REG:

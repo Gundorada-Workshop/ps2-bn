@@ -596,6 +596,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # slt
             instruction.type = IT.GenericInt
             instruction.name = "slt"
+            instruction.il_func = ee_func.slt
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -603,6 +604,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # sltu
             instruction.type = IT.GenericInt
             instruction.name = "sltu"
+            instruction.il_func = ee_func.sltu
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -1493,6 +1495,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # slti
             instruction.type = IT.GenericInt
             instruction.name = "slti"
+            instruction.il_func = ee_func.slti
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
@@ -1500,6 +1503,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # sltiu
             instruction.type = IT.GenericInt
             instruction.name = "sltiu"
+            instruction.il_func = ee_func.sltiu
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             operand = opcode & 0xFFFF
