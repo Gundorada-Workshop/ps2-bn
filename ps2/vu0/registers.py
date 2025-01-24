@@ -6,8 +6,13 @@ i_registers: Dict[RegisterName, RegisterInfo] = {
     name: RegisterInfo(name, 2) for name in i_register_names
 }
 
-Q_REGISTER = RegisterName("Q")
-i_registers[Q_REGISTER] = RegisterInfo(Q_REGISTER, 2)
+# rng reg
+R_REGISTER = RegisterName("$vir")
+i_registers[R_REGISTER] = RegisterInfo(R_REGISTER, 3) # actually 23-bit
+
+# EFU results
+P_REGISTER = RegisterName("$vip")
+i_registers[P_REGISTER] = RegisterInfo(P_REGISTER, 4)
 
 def get_i_name(index: int) -> RegisterName:
     if not 0 <= index < 16:
@@ -20,6 +25,18 @@ f_registers: Dict[RegisterName, RegisterInfo] = {
     name: RegisterInfo(name, 16) for name in f_register_names
 }
 
+# result of div/sqrt etc
+Q_REGISTER = RegisterName("$vfq")
+f_registers[Q_REGISTER] = RegisterInfo(Q_REGISTER, 2)
+
+# accumulator
+ACC_REGISTER = RegisterName("$vfacc")
+f_registers[ACC_REGISTER] = RegisterInfo(ACC_REGISTER, 16)
+
+# immediate value reg
+I_REGISTER = RegisterName("$vfi")
+f_registers[I_REGISTER] = RegisterInfo(I_REGISTER, 4)
+
 _components = ["x", "y", "z", "w"]
 
 def get_f_name(index: int) -> RegisterName:
@@ -27,17 +44,6 @@ def get_f_name(index: int) -> RegisterName:
         raise IndexError(f"Invalid VU0F register index {index}")
 
     return f_register_names[index]
-
-def get_subregister_name(index: int, component: int):
-    if not 0 <= index < 32:
-        raise IndexError(f"Invalid VU0F register index {index}")
-    
-    return RegisterName(f"{get_f_name(index)}{_components[component]}")
-
-for i in range(len(f_registers)):
-    for component in range(0, 4):
-        name = get_subregister_name(i, component)
-        f_registers[name] = RegisterInfo(get_f_name(i), 4, i * 4)
 
 # TODO
 c_register_names = [RegisterName(f"$vcr{i}") for i in range(32)]
