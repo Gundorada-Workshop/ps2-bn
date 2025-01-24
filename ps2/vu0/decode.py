@@ -1,5 +1,5 @@
 from ..instruction import Instruction, InstructionType
-from .registers import get_f_name, Q_REGISTER, ACC_REGISTER, I_REGISTER
+from .registers import get_f_name, get_i_name, Q_REGISTER, ACC_REGISTER, I_REGISTER, CMSAR0_REGISTER
 
 def decode_cop2_special(opcode: int, addr: int) -> Instruction:
     instruction = Instruction()
@@ -296,43 +296,103 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = get_f_name(ft)
         case 0x2D:
             # vmsub
-            #
+            # VF[fd].comp = ACC.comp - (VF[fs].comp * VF[vt].comp)
             instruction.name = "vmsub"
+            fd    = (opcode >> 6)  & 0x1F
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(fd)
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x2E:
             # vopmsub
-            #
+            # VF[fd].xyz = ACC.xyz - VF[fs].xyz * VF[ft].xyz
             instruction.name = "vopmsub"
+            fd    = (opcode >> 6)  & 0x1F
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F # hardcoded to xyz
+
+            instruction.reg1 = get_f_name(fd)
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x2F:
             # vmini
-            #
+            # VF[fd].comp = min(VF[fs], VF[ft])
             instruction.name = "vmini"
+            fd    = (opcode >> 6)  & 0x1F
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(fd)
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x30:
             # viadd
-            #
+            # VI[id] = VI[is] + VI[it]
             instruction.name = "viadd"
+            id    = (opcode >> 6)  & 0x1F
+            _is   = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F # hardcoded to none
+
+            instruction.reg1 = get_i_name(id)
+            instruction.reg2 = get_i_name(_is)
+            instruction.reg3 = get_i_name(it)
         case 0x31:
             # visub
+            # VI[id] = VI[is] - VI[it]
             instruction.name = "visub"
+            id    = (opcode >> 6)  & 0x1F
+            _is   = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F # hardcoded to none
+
+            instruction.reg1 = get_i_name(id)
+            instruction.reg2 = get_i_name(_is)
+            instruction.reg3 = get_i_name(it)
         case 0x32:
             # viaddi
             #
             instruction.name = "viaddi"
         case 0x34:
             # viand
-            #
+            # VI[id] = VI[is] & VI[it]
             instruction.name = "viand"
+            id    = (opcode >> 6)  & 0x1F
+            _is   = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F # hardcoded to none
+
+            instruction.reg1 = get_i_name(id)
+            instruction.reg2 = get_i_name(_is)
+            instruction.reg3 = get_i_name(it)
         case 0x35:
             # vior
-            #
+            # VI[id] = VI[is] | VI[it]
             instruction.name = "vior"
+            id    = (opcode >> 6)  & 0x1F
+            _is   = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F # hardcoded to none
+
+            instruction.reg1 = get_i_name(id)
+            instruction.reg2 = get_i_name(_is)
+            instruction.reg3 = get_i_name(it)
         case 0x38:
             # vcallms
-            #
+            # call addr
             instruction.name = "vcallms"
+            imm = (opcode >> 6) & 0x7FFF
+            instruction.operand = imm
         case 0x39:
             # vcallmsr
-            #
+            # call CMSAR0
             instruction.name = "vcallmsr"
+            instruction.reg1 = CMSAR0_REGISTER
         case 0x3C | 0x3D | 0x3E | 0x3F:
             return decode_cop2_special2(opcode, addr)
 
