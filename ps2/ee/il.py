@@ -161,8 +161,11 @@ def jr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 
 def _load(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int, sign_extend: bool) -> None:
     value = il.load(size, il.add(4, il.reg(4, instruction.reg2), il.const(4, instruction.operand)))
-    if sign_extend:
-        value = il.sign_extend(8, value)
+    if size < 8:
+        if sign_extend:
+            value = il.sign_extend(8, value)
+        else:
+            value = il.zero_extend(8, value)
 
     # lb, lh, lw, ld write first 64-bits of register; lq writes all 128-bits
     reg_size = max(8, size)
