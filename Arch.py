@@ -1,21 +1,39 @@
 from __future__ import annotations
 from typing import Optional
+from .platform import PlayStation2
 from .ps2.decode import convert_to_pseudo, decode
 from .ps2.instruction import Instruction, InstructionType
 from .ps2.ee.registers import registers as EERegisters
 from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG, RA_REG, SP_REG, ZERO_REG
+from .ps2.ee.registers import CALLER_SAVED_REGS as EE_CALLER_SAVED_REGS
+from .ps2.ee.registers import CALLEE_SAVED_REGS as EE_CALLEE_SAVED_REGS
+from .ps2.ee.registers import INT_ARG_REGS, INT_RETURN_REG, HIGH_INT_RETURN_REG, GLOBAL_POINTER_REG
 from .ps2.fpu.registers import registers as FPURegisters
 from .ps2.fpu.registers import c_registers as FPUCRegisters
+from .ps2.fpu.registers import CALLER_SAVED_REGS as FPU_CALLER_SAVED_REGS
+from .ps2.fpu.registers import CALLEE_SAVED_REGS as FPU_CALLEE_SAVED_REGS
+from .ps2.fpu.registers import FLOAT_ARG_REGS, FLOAT_RETURN_REG
 from .ps2.vu0.registers import i_registers as VU0IRegisters
 from .ps2.vu0.registers import f_registers as VU0FRegisters
 from .ps2.vu0.registers import c_registers as VU0CRegisters
 from .ps2.cop0.registers import registers as COP0Registers
 from .ps2.cop0.registers import c_registers as COP0CRegisters
 from .ps2.intrinsics import PS2Intrinsic
-from binaryninja.architecture import Architecture
-from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
-from binaryninja.enums import InstructionTextTokenType, BranchType
 from binaryninja import lowlevelil, IntrinsicInfo, Type
+from binaryninja.architecture import Architecture
+from binaryninja.callingconvention import CallingConvention
+from binaryninja.enums import InstructionTextTokenType, BranchType
+from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
+
+class PS2CdeclCall(CallingConvention):
+    caller_saved_regs = EE_CALLER_SAVED_REGS + FPU_CALLER_SAVED_REGS
+    callee_saved_regs = EE_CALLEE_SAVED_REGS + FPU_CALLEE_SAVED_REGS
+    int_arg_regs = INT_ARG_REGS
+    float_arg_regs = FLOAT_ARG_REGS
+    int_return_reg = INT_RETURN_REG
+    high_int_return_reg = HIGH_INT_RETURN_REG
+    float_return_reg = FLOAT_RETURN_REG
+    global_pointer_reg = GLOBAL_POINTER_REG
 
 class EmotionEngine(Architecture):
     name             = "EmotionEngine"
@@ -23,6 +41,7 @@ class EmotionEngine(Architecture):
     default_int_size = 4
     instr_alignment  = 4
     max_instr_length = 8 # Branch + Branch delay slot
+    standalone_platform = PlayStation2
 
     regs = EERegisters | COP0Registers | COP0CRegisters | FPURegisters | FPUCRegisters | VU0IRegisters | VU0FRegisters | VU0CRegisters
     intrinsics = {

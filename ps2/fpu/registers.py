@@ -1,6 +1,12 @@
 from binaryninja.architecture import RegisterName, RegisterInfo
 from typing import Dict, List, Tuple
 
+F0_REG = RegisterName("$f0")
+FLOAT_RETURN_REG = F0_REG
+FLOAT_ARG_REGS = [RegisterName(f"$f{i}") for i in range(12, 20)]
+CALLER_SAVED_REGS = [F0_REG] + [RegisterName(f"$f{i}") for i in range(1, 12)] + FLOAT_ARG_REGS
+CALLEE_SAVED_REGS = [RegisterName(f"$f{i}") for i in range(20, 32)]
+
 register_names = [RegisterName(f"$f{i}") for i in range(32)]
 registers: Dict[RegisterName, RegisterInfo] = {
     name: RegisterInfo(name, 4) for name in register_names
