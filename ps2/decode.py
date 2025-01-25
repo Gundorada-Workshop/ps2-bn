@@ -1838,7 +1838,7 @@ def convert_to_pseudo(instruction: Instruction) -> None:
             elif instruction.reg2 == ZERO_REG:
                 # beqz
                 instruction.name = "beqz"
-                instruction.reg1 = None
+                instruction.reg2 = None
         case "beql":
             if instruction.reg1 == ZERO_REG:
                 # beqzl
@@ -1848,7 +1848,7 @@ def convert_to_pseudo(instruction: Instruction) -> None:
             elif instruction.reg2 == ZERO_REG:
                 # beqzl
                 instruction.name = "beqzl"
-                instruction.reg1 = None
+                instruction.reg2 = None
         case "bne":
             if instruction.reg1 == ZERO_REG:
                 # bnez
