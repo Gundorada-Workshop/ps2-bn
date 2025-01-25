@@ -31,7 +31,7 @@ def _addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: i
     if r2 == ZERO_REG and r3 == ZERO_REG:
         # move
         value = il.const(size, 0)
-    if r2 == ZERO_REG:
+    elif r2 == ZERO_REG:
         # move
         value = il.reg(size, r3)
     elif r3 == ZERO_REG:
