@@ -72,6 +72,22 @@ class EmotionEngine(Architecture):
 
         return result
     
+    def _get_instruction_name(self, instruction: Instruction) -> str:
+        name = instruction.name
+
+        if instruction.type == InstructionType.Branch:
+            if instruction.cop_branch_type is not None:
+                # Coprocessor branches
+                if instruction.cop_branch_type:
+                    name += "t"
+                else:
+                    name += "f"
+                
+                if instruction.is_likely:
+                    name += "l"
+        
+        return name
+    
     def get_instruction_text(self, data: bytes, addr: int):
         if len(data) < 4:
             return None
@@ -84,9 +100,10 @@ class EmotionEngine(Architecture):
             return None
         
         # Instruction name + spaces
+        name = self._get_instruction_name(instruction)
         pad = 7 # Spaces will be padded to a *multiple* of this length
-        spaces = " " * ((pad - len(instruction.name)) % pad + 1)
-        tokens.append(InstructionTextToken(InstructionTextTokenType.InstructionToken, instruction.name))
+        spaces = " " * ((pad - len(name)) % pad + 1)
+        tokens.append(InstructionTextToken(InstructionTextTokenType.InstructionToken, name))
         tokens.append(InstructionTextToken(InstructionTextTokenType.TextToken, spaces))
 
         match instruction.type:
@@ -104,6 +121,8 @@ class EmotionEngine(Architecture):
                     str_func = hex if abs(instruction.operand) >= 10 else str
                     tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str_func(instruction.operand)))
             case IT.Branch:
+
+
                 if instruction.reg1 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg1))
                 if instruction.reg2 is not None:

@@ -69,12 +69,14 @@ def decode_regimm(opcode: int, addr: int) -> Instruction:
             instruction.name = "bltzall"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.is_likely = True
         case 0x13:
             # bgezall
             instruction.type = IT.Branch
             instruction.name = "bgezall"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.is_likely = True
         case 0x18:
             # mtsab
             instruction.type = IT.GenericInt
@@ -172,14 +174,26 @@ def decode_cop(opcode: int, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = vu0f_get_c_name((opcode >> 11) & 0x1F)
         case 0x008:
-            instruction.type = IT.GenericInt
+            # bc0
+            instruction.type = IT.Branch
             instruction.name = "bc0"
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.cop_branch_type = bool((opcode >> 16) & 1)
+            instruction.is_likely = bool((opcode >> 17) & 1)
         case 0x108:
-            instruction.type = IT.GenericInt
+            # bc1
+            instruction.type = IT.Branch
             instruction.name = "bc1"
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.cop_branch_type = bool((opcode >> 16) & 1)
+            instruction.is_likely = bool((opcode >> 17) & 1)
         case 0x208:
-            instruction.type = IT.GenericInt
+            # bc2
+            instruction.type = IT.Branch
             instruction.name = "bc2"
+            instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.cop_branch_type = bool((opcode >> 16) & 1)
+            instruction.is_likely = bool((opcode >> 17) & 1)
         case 0x110:
             # FPU functions
             return decode_cop_s(opcode, addr)
@@ -1548,6 +1562,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.is_likely = True
         case 0x15:
             # bnel
             instruction.type = IT.Branch
@@ -1555,18 +1570,21 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.is_likely = True
         case 0x16:
             # blezl
             instruction.type = IT.Branch
             instruction.name = "blezl"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.is_likely = True
         case 0x17:
             # bgtzl
             instruction.type = IT.Branch
             instruction.name = "bgtzl"
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
+            instruction.is_likely = True
         case 0x18:
             # daddi
             instruction.type = IT.GenericInt

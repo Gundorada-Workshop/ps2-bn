@@ -14,6 +14,11 @@ class InstructionType(Enum):
     LoadStore = auto()
 
 class Instruction:
+    __slots__ = [
+        "type", "name", "branch_dest", "reg1", "reg2", "reg3", "operand", "il_func",
+        "arch", "cop_branch_type", "is_likely",
+    ]
+
     type: InstructionType
     name: Optional[str]
     branch_dest: Optional[int]
@@ -23,6 +28,14 @@ class Instruction:
     operand: Optional[str]
     il_func: Optional[Callable]
     arch: Optional[Type[EmotionEngine]]
+    cop_branch_type: Optional[bool]
+    """
+    Determines if a COP branch (bc1 or bc2) branches on true or false condition
+    """
+    is_likely: bool
+    """
+    If branch instruction, is it likely
+    """
 
     def __init__(self):
         self.type = InstructionType.UNDEFINED
@@ -34,3 +47,5 @@ class Instruction:
         self.operand = None
         self.il_func = None
         self.arch = None
+        self.cop_branch_type = None
+        self.is_likely = False
