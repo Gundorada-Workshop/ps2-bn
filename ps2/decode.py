@@ -397,6 +397,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # srl
             instruction.type = IT.GenericInt
             instruction.name = "srl"
+            instruction.il_func = ee_func.srl
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = (opcode >> 6) & 0x1F
@@ -404,6 +405,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # sra
             instruction.type = IT.GenericInt
             instruction.name = "sra"
+            instruction.il_func = ee_func.sra
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = (opcode >> 6) & 0x1F
@@ -1528,6 +1530,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # andi
             instruction.type = IT.GenericInt
             instruction.name = "andi"
+            instruction.il_func = ee_func.andi
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = opcode & 0xFFFF
@@ -1535,6 +1538,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # ori
             instruction.type = IT.GenericInt
             instruction.name = "ori"
+            instruction.il_func = ee_func.ori
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = opcode & 0xFFFF
@@ -1542,6 +1546,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # xori
             instruction.type = IT.GenericInt
             instruction.name = "xori"
+            instruction.il_func = ee_func.xori
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.operand = opcode & 0xFFFF

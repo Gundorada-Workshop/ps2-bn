@@ -46,6 +46,14 @@ def _addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: i
 def addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _addu(instruction, addr, il, 4)
 
+def andi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    dreg = il.reg(4, instruction.reg1)
+    sreg = il.reg(4, instruction.reg2)
+    imm = il.const(4, instruction.operand)
+    expr = il.and_expr(4, dreg, imm)
+
+    il.append(il.set_reg(4, sreg, expr))
+
 def _unconditional_branch(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(
         il.jump(
@@ -187,6 +195,14 @@ def lui(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def nop(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.nop())
 
+def ori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    dreg = il.reg(4, instruction.reg1)
+    sreg = il.reg(4, instruction.reg2)
+    imm = il.const(4, instruction.operand)
+    expr = il.or_expr(4, dreg, imm)
+
+    il.append(il.set_reg(4, sreg, expr))
+
 def sll(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.shift_left(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
     il.append(il.set_reg(4, instruction.reg1, val))
@@ -219,6 +235,14 @@ def sltu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 
     il.append(il.set_reg(4, instruction.reg1, expr))
 
+def sra(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    val = il.arith_shift_right(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
+    il.append(il.set_reg(4, instruction.reg1, val))
+
+def srl(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    val = il.logical_shift_right(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
+    il.append(il.set_reg(4, instruction.reg1, val))
+
 def _store(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
     value = None
     if instruction.reg1 == ZERO_REG:
@@ -237,3 +261,11 @@ sw  = lambda instruction, addr, il: _store(instruction, addr, il, 4)
 
 def syscall(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.system_call())
+
+def xori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    dreg = il.reg(4, instruction.reg1)
+    sreg = il.reg(4, instruction.reg2)
+    imm = il.const(4, instruction.operand)
+    expr = il.xor_expr(4, dreg, imm)
+
+    il.append(il.set_reg(4, sreg, expr))
