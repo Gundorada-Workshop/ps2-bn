@@ -23,7 +23,6 @@ class Instruction:
     operand: Optional[str]
     il_func: Optional[Callable]
     arch: Optional[Type[EmotionEngine]]
-    hex_operand: bool
 
     def __init__(self):
         self.type = InstructionType.UNDEFINED
@@ -35,4 +34,3 @@ class Instruction:
         self.operand = None
         self.il_func = None
         self.arch = None
-        self.hex_operand = True
