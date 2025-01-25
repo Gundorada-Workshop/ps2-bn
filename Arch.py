@@ -97,6 +97,12 @@ class EmotionEngine(Architecture):
     def _get_instruction_name(self, instruction: Instruction) -> str:
         name = instruction.name
 
+        if instruction.broadcast_component is not None:
+            name += instruction.broadcast_component
+
+        if instruction.destination_components is not None:
+            name += f".{instruction.destination_components}"
+
         if instruction.type == InstructionType.Branch:
             if instruction.cop_branch_type is not None:
                 # Coprocessor branches

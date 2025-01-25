@@ -25,23 +25,23 @@ field_bits_to_string = [
     'invalid',
     'w',
     'z',
-    'wz',
+    'zw',
     'y',
-    'wy',
-    'zy',
-    'wzy',
+    'yw',
+    'yz',
+    'yxw',
     'x',
-    'wx',
-    'zx',
-    'wzx',
-    'yx',
-    'wyx',
-    'zyx',
-    'wzyx'
+    'xw',
+    'xz',
+    'xzw',
+    'xy',
+    'xyw',
+    'xyz',
+    'xyzw'
 ]
 
 def decode_component_bits(bits: int):
-    return field_bits_to_string[bits][::-1]
+    return field_bits_to_string[bits]
 
 def decode_single_component_name(id: int):
     return component_bits[id & 0x03]
