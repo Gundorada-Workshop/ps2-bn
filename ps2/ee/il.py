@@ -47,12 +47,14 @@ def addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _addu(instruction, addr, il, 4)
 
 def andi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    dreg = il.reg(4, instruction.reg1)
     sreg = il.reg(4, instruction.reg2)
     imm = il.const(4, instruction.operand)
-    expr = il.and_expr(4, dreg, imm)
 
-    il.append(il.set_reg(4, sreg, expr))
+    expr = il.and_expr(4, sreg, imm)
+    if instruction.reg2 == ZERO_REG:
+        expr = il.const(4, 0)
+        
+    il.append(il.set_reg(4, instruction.reg1, expr))
 
 def _unconditional_branch(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(
@@ -196,12 +198,14 @@ def nop(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.nop())
 
 def ori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    dreg = il.reg(4, instruction.reg1)
     sreg = il.reg(4, instruction.reg2)
     imm = il.const(4, instruction.operand)
-    expr = il.or_expr(4, dreg, imm)
 
-    il.append(il.set_reg(4, sreg, expr))
+    expr = il.or_expr(4, sreg, imm)
+    if instruction.reg2 == ZERO_REG:
+        expr = imm
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
 
 def sll(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.shift_left(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
@@ -263,9 +267,11 @@ def syscall(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> No
     il.append(il.system_call())
 
 def xori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    dreg = il.reg(4, instruction.reg1)
     sreg = il.reg(4, instruction.reg2)
     imm = il.const(4, instruction.operand)
-    expr = il.xor_expr(4, dreg, imm)
 
-    il.append(il.set_reg(4, sreg, expr))
+    expr = il.xor_expr(4, sreg, imm)
+    if instruction.reg2 == ZERO_REG:
+        expr = imm
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
