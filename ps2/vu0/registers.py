@@ -17,6 +17,9 @@ i_registers[P_REGISTER] = RegisterInfo(P_REGISTER, 4)
 CMSAR0_REGISTER = RegisterName("$cmsar0")
 i_registers[CMSAR0_REGISTER] = RegisterInfo(CMSAR0_REGISTER, 4)
 
+CF_REGISTER = RegisterName("$vcf")
+i_registers[CF_REGISTER] = RegisterInfo(CF_REGISTER, 4)
+
 def get_i_name(index: int) -> RegisterName:
     if not 0 <= index < 16:
         raise IndexError(f"Invalid VU0I register index {index}")

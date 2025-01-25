@@ -1,5 +1,13 @@
 from ..instruction import Instruction, InstructionType
-from .registers import get_f_name, get_i_name, Q_REGISTER, ACC_REGISTER, I_REGISTER, CMSAR0_REGISTER
+from .registers import (
+    get_f_name,
+    get_i_name,
+    Q_REGISTER,
+    ACC_REGISTER,
+    I_REGISTER,
+    R_REGISTER,
+    CMSAR0_REGISTER
+)
 
 def decode_cop2_special(opcode: int, addr: int) -> Instruction:
     instruction = Instruction()
@@ -457,34 +465,76 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = get_f_name(ft)
         case 0x10:
             # vitof0
-            #
+            # VF[ft] = ToF32FromFixedPoint0(VF[fs])
             instruction.name = "vitof0"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x11:
             # vitof4
-            #
+            # VF[ft] = ToF32FromFixedPoint4(VF[fs])
             instruction.name = "vitof4"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x12:
             # vitof12
-            #
+            # VF[ft] = ToF32FromFixedPoint12(VF[fs])
             instruction.name = "vitof12"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x13:
             # vitof15
-            #
+            # VF[ft] = ToF32FromFixedPoint15(VF[fs])
             instruction.name = "vitof15"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x14:
             # vftoi0
-            #
+            # VF[ft] = ToFixedPoint0FromF32(VF[fs])
             instruction.name = "vftoi0"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x15:
             # vftoi4
-            #
+            #V F[ft] = ToFixedPoint4FromF32(VF[fs])
             instruction.name = "vftoi4"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x16:
             # vftoi12
+            # VF[ft] = ToFixedPoint12FromF32(VF[fs])
             instruction.name = "vftoi12"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x17:
             # vftoi15
+            # VF[ft] = ToFixedPoint15FromF32(VF[fs])
             instruction.name = "vftoi15"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x18 | 0x19 | 0x1A | 0x1B:
             # vmulabc
             # ACC.comp = VF[fs].comp * VF[ft].bcomp
@@ -499,20 +549,39 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = get_f_name(ft)
         case 0x1C:
             # vmulaq
-            #
+            # ACC.comp = VF[fs].comp * Q
             instruction.name = "vmulaq"
+            fs    = (opcode >> 11) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = Q_REGISTER
         case 0x1D:
             # vabs
-            #
+            # VF[ft].comp = abs(VF[fs].comp)
             instruction.name = "vabs"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x1E:
             # vmulai
-            #
+            # ACC.comp = VF[fs].comp * I
             instruction.name = "vmulai"
         case 0x1F:
             # vclip
-            #
+            # CF = clip(VF[fs].xyz, VF[ft].w)
             instruction.name = "vclip"
+            bcomp = (opcode >> 0)  & 0x03 # harcoded to w
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F # hardcoded to xyz
+
+            instruction.reg1 = get_f_name(fs)
+            instruction.reg2 = get_f_name(ft)
         case 0x20:
             # vaddaq
             # ACC.comp = VF[fs].comp + Q
@@ -525,8 +594,14 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = Q_REGISTER
         case 0x21:
             # vmaddaq
-            #
+            # ACC.comp = ACC.comp + (VF[fs].comp * Q)
             instruction.name = "vmaddaq"
+            fs    = (opcode >> 11) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = Q_REGISTER
         case 0x22:
             # vaddai
             # ACC.comp = VF[fs].comp + I
@@ -539,20 +614,44 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = I_REGISTER
         case 0x23:
             # vmaddai
-            #
+            # ACC.comp = ACC.comp + (VF[fs].comp * I)
             instruction.name = "vmaddai"
+            fs    = (opcode >> 11) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = I_REGISTER
         case 0x25:
             # vmsubaq
-            #
+            # ACC.comp = ACC.comp - (VF[fs].comp * Q)
             instruction.name = "vmsubaq"
+            fs    = (opcode >> 11) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = Q_REGISTER
         case 0x26:
             # vsubai
-            #
+            # ACC.comp = VF[fs].comp - I
             instruction.name = "vsubai"
+            fs    = (opcode >> 11) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = I_REGISTER
         case 0x27:
             # vmsubai
-            #
+            # ACC.comp = ACC.comp - (VF[fs].comp * I)
             instruction.name = "vmsubai"
+            fs    = (opcode >> 11) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = I_REGISTER
         case 0x28:
             # vadda ACC.comp = VF[fs].comp + VF[ft].comp
             instruction.name = "vadda"
@@ -565,52 +664,124 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = get_f_name(ft)
         case 0x29:
             # vmadda
-            #
+            # ACC.comp = ACC.comp + (VF[fs].comp * VF[ft].comp)
             instruction.name = "vmadda"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x2A:
             # vmula
-            #
+            # ACC.comp = VF[fs].comp * VF[ft].comp
             instruction.name = "vmula"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x2C:
             # vsuba
-            #
+            # ACC.comp = VF[fs].comp - VF[ft].comp
             instruction.name = "vsuba"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x2D:
             # vmsuba
-            #
+            # ACC.comp = ACC.comp - (VF[fs].comp * VF[ft].comp)
             instruction.name = "vmsuba"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x2E:
             # vopmula
-            #
+            # ACC.xyz = VF[fs].xyz * VF[ft].xyz
             instruction.name = "vopmula"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F # hardcoded to xyz
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x2F:
             # vnop
-            #
             instruction.name = "vnop"
         case 0x30:
             # vmove
-            #
+            # VF[ft].comp = VF[fs].comp
             instruction.name = "vmove"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x31:
             # vmr32
-            #
+            # VF[ft].comp = rotate_right(VF[ft])
             instruction.name = "vmr32"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(fs)
         case 0x34:
             # vlqi
-            #
+            # VF[ft].comp = read(VI[is]).comp
+            # VF[ft]++
             instruction.name = "vlqi"
+            _is   = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_i_name(_is)
         case 0x35:
             # vsqi
-            #
+            # write(VI[it], VF[fs].comp)
+            # VI[it]++
             instruction.name = "vsqi"
+            fs    = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(fs)
+            instruction.reg2 = get_i_name(it)
         case 0x36:
             # vlqd
-            #
+            # VF[ft] = read(VI[is]--)
             instruction.name = "vlqd"
+            _is   = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_i_name(_is)
         case 0x37:
             # vsqd
-            #
+            # write(VI[it]--, VF[fs].comp)
             instruction.name = "vsqd"
+            fs    = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(fs)
+            instruction.reg2 = get_i_name(it)
         case 0x38:
             # vdiv
             # Q = VF[fs].fsf / VF[ft].ftf
@@ -634,41 +805,94 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.reg2 = get_f_name(ft)
         case 0x3A:
             # vrsqrt
-            #
+            # Q = VF[fs].fsf / sqrt(VF[ft].ftf)
             instruction.name = "vrsqrt"
+            fs    = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            fsf   = (opcode >> 21) & 0x03
+            ftf   = (opcode >> 23) & 0x03
+
+            instruction.reg1 = Q_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = get_f_name(ft)
         case 0x3B:
             # vwaitq
-            #
             instruction.name = "vwaitq"
         case 0x3C:
             # vmtir
-            #
+            # VI[it] = trunc16(VF[fs].fsf)
             instruction.name = "vmtir"
+            fs    = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            fsf   = (opcode >> 21) & 0x03
+
+            instruction.reg1 = get_i_name(it)
+            instruction.reg2 = get_f_name(fs)
         case 0x3D:
             # vmfir
-            #
+            # VF[ft].comp = VI[is]
             instruction.name = "vmfir"
+            _is   = (opcode >> 11) & 0x1F
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = get_f_name(_is)
         case 0x3E:
             # vilwr
-            #
+            # VI[it].comp = read(VI[is]).comp
             instruction.name = "vilwr"
+            _is   = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_i_name(it)
+            instruction.reg2 = get_i_name(_is)
         case 0x3F:
             # viswr
-            #
+            # write(VI[is], read(VI[it]).comp)
             instruction.name = "viswr"
+            _is   = (opcode >> 11) & 0x1F
+            it    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_i_name(it)
+            instruction.reg2 = get_i_name(_is)
         case 0x40:
             # vrnext
-            #
+            # VF[ft].comp = rand(R)
             instruction.name = "vrnext"
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = R_REGISTER
         case 0x41:
             # vrget
-            #
+            # VF[ft].comp = R
             instruction.name = "vrget"
+            ft    = (opcode >> 16) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = get_f_name(ft)
+            instruction.reg2 = R_REGISTER
         case 0x42:
+            # vrinit
+            # R = VF[fs].fsf
             instruction.name = "vrinit"
+            fs    = (opcode >> 11) & 0x1F
+            fsf   = (opcode >> 21) & 0x03
+
+            instruction.reg1 = R_REGISTER
+            instruction.reg2 = get_f_name(fs)
         case 0x43:
             # vrxor
-            #
+            # R = VF[fs].fsf ^ R
             instruction.name = "vrxor"
+            fs    = (opcode >> 11) & 0x1F
+            fsf   = (opcode >> 21) & 0x03
+
+            instruction.reg1 = R_REGISTER
+            instruction.reg2 = get_f_name(fs)
 
     return instruction
