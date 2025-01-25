@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Optional
 from .ps2.decode import convert_to_pseudo, decode
 from .ps2.instruction import Instruction, InstructionType
+from .ps2.ee.il import get_branch_cond_expr
 from .ps2.ee.registers import registers as EERegisters
 from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG, RA_REG, SP_REG, ZERO_REG
 from .ps2.ee.registers import CALLER_SAVED_REGS as EE_CALLER_SAVED_REGS
@@ -23,6 +24,7 @@ from binaryninja.architecture import Architecture
 from binaryninja.callingconvention import CallingConvention
 from binaryninja.enums import InstructionTextTokenType, BranchType
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
+from binaryninja.lowlevelil import LowLevelILConst, LowLevelILInstruction, LowLevelILLabel
 
 class PS2CdeclCall(CallingConvention):
     caller_saved_regs = EE_CALLER_SAVED_REGS + FPU_CALLER_SAVED_REGS
@@ -192,17 +194,31 @@ class EmotionEngine(Architecture):
             il.append(il.unimplemented())
             return 4
         
-        instruction2 = None
-        if instruction1.type == InstructionType.Branch and \
+        # Handle branches
+        if len(data) >= 8 and \
+            instruction1.type == InstructionType.Branch and \
             instruction1.name not in ["eret", "syscall"]:
-            if len(data) >= 8:
-                instruction2 = decode(data[4:8], addr + 4)
-
-        if instruction2 is not None:
+            instruction2 = decode(data[4:8], addr + 4)
             instruction2.arch = EmotionEngine
-            if instruction2.il_func is not None:
-                instruction2.il_func(instruction2, addr + 4, il)
-                length += 4
+            length += 4
+
+            if instruction1.is_likely:
+                # Likely branches
+                # Only do the branch delay slot if the branch condition is true
+                cond = get_branch_cond_expr(instruction1, addr, il)
+
+                t = LowLevelILLabel()
+                f = LowLevelILLabel()
+                il.append(il.if_expr(cond, t, f))
+                il.mark_label(t)
+                if instruction2.il_func is not None:
+                    instruction2.il_func(instruction2, addr + 4, il)
+                il.mark_label(f)
+            else:
+                # Normal branch
+                instruction2 = decode(data[4:8], addr + 4)
+                if instruction2.il_func is not None:
+                    instruction2.il_func(instruction2, addr + 4, il)
         
         instruction1.il_func(instruction1, addr, il)
         return length

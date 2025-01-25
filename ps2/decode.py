@@ -464,6 +464,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # break
             instruction.type = IT.GenericInt
             instruction.name = "break"
+            instruction.il_func = ee_func.break_ee
         case 0x0F:
             # sync
             instruction.type = IT.GenericInt
@@ -1564,6 +1565,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # beql
             instruction.type = IT.Branch
             instruction.name = "beql"
+            instruction.il_func = ee_func.beq
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
@@ -1572,6 +1574,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # bnel
             instruction.type = IT.Branch
             instruction.name = "bnel"
+            instruction.il_func = ee_func.bne
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)

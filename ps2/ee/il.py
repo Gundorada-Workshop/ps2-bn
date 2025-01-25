@@ -98,37 +98,26 @@ def _branch(instruction: Instruction, addr: int, il: 'LowLevelILFunction', cond:
         il.append(il.jump(f_dest))
     il.mark_label(done)
 
+def break_ee(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    il.append(il.breakpoint())
+
 def beq(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     r1 = instruction.reg1
     r2 = instruction.reg2
-    val1 = il.reg(4, instruction.reg1)
-    val2 = il.reg(4, instruction.reg2)
 
     if r1 == ZERO_REG and r2 == ZERO_REG:
         return _unconditional_branch(instruction, addr, il)
-    elif r1 == ZERO_REG:
-        val1 = il.const(4, 0)
-    elif r2 == ZERO_REG:
-        val2 = il.const(4, 0)
 
-    cond = il.compare_equal(4, val1, val2)
-    _branch(instruction, addr, il, cond)
+    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il))
 
 def bne(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     r1 = instruction.reg1
     r2 = instruction.reg2
-    val1 = il.reg(4, instruction.reg1)
-    val2 = il.reg(4, instruction.reg2)
 
     if r1 == ZERO_REG and r2 == ZERO_REG:
         return _unconditional_failed_branch(instruction, addr, il)
-    elif r1 == ZERO_REG:
-        val1 = il.const(4, 0)
-    elif r2 == ZERO_REG:
-        val2 = il.const(4, 0)
-
-    cond = il.compare_not_equal(4, val1, val2)
-    _branch(instruction, addr, il, cond)
+    
+    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il))
 
 def dadd(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _addu(instruction, addr, il, 8)
@@ -275,3 +264,38 @@ def xori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
         expr = imm
 
     il.append(il.set_reg(4, instruction.reg1, expr))
+
+def get_branch_cond_expr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> ExpressionIndex:
+    # Returns the comparison for a branch (ignoring unconditional branches)
+
+    r1 = instruction.reg1
+    r2 = instruction.reg2
+    val1 = il.reg(4, instruction.reg1)
+    val2 = il.reg(4, instruction.reg2)
+
+    if r1 == ZERO_REG:
+        val1 = il.const(4, 0)
+    elif r2 == ZERO_REG:
+        val2 = il.const(4, 0)
+
+    match instruction.name:
+        case "bc0":
+            return il.unimplemented()
+        case "bc1":
+            return il.unimplemented()
+        case "bc2":
+            return il.unimplemented()
+        case "beq" | "beql":
+            return il.compare_equal(4, val1, val2)
+        case "bgez" | "beqzl" | "bgezal" | "bgezall":
+            return il.compare_signed_greater_equal(4, val1, il.const(4, 0))
+        case "bgtz" | "bgtzl":
+            return il.compare_signed_greater_than(4, val1, il.const(4, 0))
+        case "blez" | "blezl":
+            return il.compare_signed_less_equal(4, val1, il.const(4, 0))
+        case "bltz" | "bltzl" | "bltzal" | "bltzall":
+            return il.compare_signed_less_than(4, val1, il.const(4, 0))
+        case "bne" | "bnel":
+            return il.compare_not_equal(4, val1, val2)
+        case _:
+            raise ValueError(f"Unexpected branch operation {instruction.name}")
