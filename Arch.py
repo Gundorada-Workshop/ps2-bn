@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import Optional
-from .ps2.decode import decode
+from .ps2.decode import convert_to_pseudo, decode
 from .ps2.instruction import Instruction, InstructionType
 from .ps2.ee.registers import registers as EERegisters
 from .ps2.ee.registers import HI_REG, LO_REG, PC_REG, SA_REG, RA_REG, SP_REG, ZERO_REG
@@ -45,8 +45,13 @@ class EmotionEngine(Architecture):
         result.length = 4
 
         if instruction.type == IT.Branch:
+            name = instruction.name
+            if instruction.name == "beq" and instruction.reg1 == ZERO_REG and instruction.reg2 == ZERO_REG:
+                # Fix behavior of beq zero, zero in graph view
+                name = "b"
+
             result.branch_delay = 1
-            match instruction.name:
+            match name:
                 case "jr":
                     if instruction.reg1 == EmotionEngine.link_register:
                         result.add_branch(BranchType.FunctionReturn)
@@ -93,6 +98,11 @@ class EmotionEngine(Architecture):
             return None
 
         instruction = decode(data[0:4], addr)
+
+        # Converts instruction properties to that of a psuedo-operation
+        # e.g. beq zero, zero -> b or addiu v0, zero, 1 -> li v0, 1
+        convert_to_pseudo(instruction)
+
         IT = InstructionType
         tokens = []
 

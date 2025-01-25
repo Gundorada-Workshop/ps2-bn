@@ -1803,3 +1803,94 @@ def decode(data: bytes, addr: int) -> Instruction:
             instruction.operand = sign_extend_16_bit(opcode & 0xFFFF)
         
     return instruction
+
+def convert_to_pseudo(instruction: Instruction) -> None:
+    """
+    Modifies an instruction for the text disasm step so that a psuedo operation can be displayed instead.
+    """
+    match instruction.name:
+        case "addi" | "addiu":
+            if instruction.reg2 == ZERO_REG:
+                # li
+                instruction.name = "li"
+                instruction.reg2 = None
+        case "add" | "addu":
+            if instruction.reg2 == ZERO_REG:
+                # move
+                instruction.name = "move"
+                instruction.reg2 = instruction.reg3
+                instruction.reg3 = None
+            elif instruction.reg3 == ZERO_REG:
+                # move
+                instruction.name = "move"
+                instruction.reg3 = None
+        case "beq":
+            if instruction.reg1 == ZERO_REG and instruction.reg2 == ZERO_REG:
+                # b
+                instruction.name = "b"
+                instruction.reg1 = None
+                instruction.reg2 = None
+            elif instruction.reg1 == ZERO_REG:
+                # beqz
+                instruction.name = "beqz"
+                instruction.reg1 = instruction.reg2
+                instruction.reg2 = None
+            elif instruction.reg2 == ZERO_REG:
+                # beqz
+                instruction.name = "beqz"
+                instruction.reg1 = None
+        case "beql":
+            if instruction.reg1 == ZERO_REG:
+                # beqzl
+                instruction.name = "beqzl"
+                instruction.reg1 = instruction.reg2
+                instruction.reg2 = None
+            elif instruction.reg2 == ZERO_REG:
+                # beqzl
+                instruction.name = "beqzl"
+                instruction.reg1 = None
+        case "bne":
+            if instruction.reg1 == ZERO_REG:
+                # bnez
+                instruction.name = "bnez"
+                instruction.reg1 = instruction.reg2
+                instruction.reg2 = None
+            elif instruction.reg2 == ZERO_REG:
+                # bnez
+                instruction.name = "bnez"
+                instruction.reg2 = None
+        case "bnel":
+            if instruction.reg1 == ZERO_REG:
+                # bnezl
+                instruction.name = "bnezl"
+                instruction.reg1 = instruction.reg2
+                instruction.reg2 = None
+            elif instruction.reg2 == ZERO_REG:
+                # bnezl
+                instruction.name = "bnezl"
+                instruction.reg2 = None
+        case "daddi" | "daddiu":
+            if instruction.reg2 == ZERO_REG:
+                # dli
+                instruction.name = "dli"
+                instruction.reg2 = None
+        case "dadd" | "daddu":
+            if instruction.reg2 == ZERO_REG:
+                # dmove
+                instruction.name = "dmove"
+                instruction.reg2 = instruction.reg3
+                instruction.reg3 = None
+            elif instruction.reg3 == ZERO_REG:
+                # dmove
+                instruction.name = "dmove"
+                instruction.reg3 = None
+        case "paddb" | "paddh" | "paddw" | "paddub" | "padduh" | "padduw":
+            if instruction.reg2 == ZERO_REG:
+                # qmove
+                instruction.name = "qmove"
+                instruction.reg2 = instruction.reg3
+                instruction.reg3 = None
+            elif instruction.reg3 == ZERO_REG:
+                # qmove
+                instruction.name = "qmove"
+                instruction.reg3 = None
