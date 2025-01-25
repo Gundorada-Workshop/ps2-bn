@@ -40,8 +40,12 @@ SA_REG = RegisterName("$sa")
 
 # Calling convention stuff
 GLOBAL_POINTER_REG = GP_REG
-INT_RETURN_REG = V0_REG
-HIGH_INT_RETURN_REG = V1_REG
+_RET_LO = RegisterName("$v0_lo")
+_RET_LO_INFO = RegisterInfo(V0_REG, 4, 0)
+INT_RETURN_REG = _RET_LO
+_RET_HI = RegisterName("$v1_lo")
+_RET_HI_INFO = RegisterInfo(V1_REG, 4, 0)
+HIGH_INT_RETURN_REG = _RET_HI
 INT_ARG_REGS = [A0_REG, A1_REG, A2_REG, A3_REG, T0_REG, T1_REG]
 CALLER_SAVED_REGS = [
     AT_REG, V0_REG, V1_REG, A0_REG, A1_REG, A2_REG, A3_REG,
@@ -95,6 +99,8 @@ register_params: List[Tuple[RegisterName, int]] = [
 registers: Dict[RegisterName, RegisterInfo] = {
     name: RegisterInfo(name, size) for name, size in register_params
 }
+registers[_RET_LO] = _RET_LO_INFO
+registers[_RET_HI] = _RET_HI_INFO 
 
 def get_name(index: int) -> RegisterName:
     if not 0 <= index < 32:
