@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Optional
-from .platform import PlayStation2
 from .ps2.decode import convert_to_pseudo, decode
 from .ps2.instruction import Instruction, InstructionType
 from .ps2.ee.registers import registers as EERegisters
@@ -41,7 +40,6 @@ class EmotionEngine(Architecture):
     default_int_size = 4
     instr_alignment  = 4
     max_instr_length = 8 # Branch + Branch delay slot
-    standalone_platform = PlayStation2
 
     regs = EERegisters | COP0Registers | COP0CRegisters | FPURegisters | FPUCRegisters | VU0IRegisters | VU0FRegisters | VU0CRegisters
     intrinsics = {
