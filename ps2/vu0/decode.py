@@ -100,7 +100,7 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
         case 0x18 | 0x19 | 0x1A | 0x1B:
             # vmulbc
             # VF[fd].comp = VF[fs].comp + VF[ft].bcomp
-            instruction.name = "vmulbc"
+            instruction.name = "vmul"
             bcomp = (opcode >> 0)  & 0x03
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
@@ -328,7 +328,7 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = get_f_name(ft)
         case 0x2F:
             # vmini
-            # VF[fd].comp = min(VF[fs], VF[ft])
+            # VF[fd].comp = min(VF[fs].comp, VF[ft].comp)
             instruction.name = "vmini"
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
@@ -364,8 +364,14 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.reg3 = get_i_name(it)
         case 0x32:
             # viaddi
-            #
+            # ACC.comp = VF[fs] + I
             instruction.name = "viaddi"
+            fs    = (opcode >> 11) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = I_REGISTER
         case 0x34:
             # viand
             # VI[id] = VI[is] & VI[it]
@@ -571,6 +577,12 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmulai
             # ACC.comp = VF[fs].comp * I
             instruction.name = "vmulai"
+            fs    = (opcode >> 11) & 0x1F
+            comp  = (opcode >> 21) & 0x1F
+
+            instruction.reg1 = ACC_REGISTER
+            instruction.reg2 = get_f_name(fs)
+            instruction.reg3 = I_REGISTER
         case 0x1F:
             # vclip
             # CF = clip(VF[fs].xyz, VF[ft].w)
