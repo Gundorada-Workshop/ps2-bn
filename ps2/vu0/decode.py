@@ -9,6 +9,43 @@ from .registers import (
     CMSAR0_REGISTER
 )
 
+component_bits: list[str] = [
+    'x',
+    'y',
+    'z',
+    'w',
+]
+
+# precomputed lookup table
+# bit 1: w
+# bit 2: z
+# bit 3: y
+# bit 4: z
+field_bits_to_string = [
+    'invalid',
+    'w',
+    'z',
+    'wz',
+    'y',
+    'wy',
+    'zy',
+    'wzy',
+    'x',
+    'wx',
+    'zx',
+    'wzx',
+    'yx',
+    'wyx',
+    'zyx',
+    'wzyx'
+]
+
+def decode_component_bits(bits: int):
+    return field_bits_to_string[bits][::-1]
+
+def decode_single_component_name(id: int):
+    return component_bits[id & 0x03]
+
 def decode_cop2_special(opcode: int, addr: int) -> Instruction:
     instruction = Instruction()
     IT = InstructionType
@@ -26,7 +63,10 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -40,7 +80,10 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -53,7 +96,10 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -66,7 +112,10 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -79,7 +128,10 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -92,7 +144,10 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -105,7 +160,10 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -116,7 +174,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmulq"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -127,7 +187,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmaxi"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -138,7 +200,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmuli"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -149,7 +213,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vminii"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -160,7 +226,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vaddq"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -171,7 +239,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmaddq"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -182,7 +252,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vaddi"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -193,7 +265,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmaddi"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -204,7 +278,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vsubq"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -215,7 +291,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmsubq"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -226,7 +304,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vsubi"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -237,7 +317,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmsubi"
             fd   = (opcode >> 6)  & 0x1F
             fs   = (opcode >> 11) & 0x1F
-            comp = (opcode >> 21) & 0x1F
+            comp = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -249,7 +331,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -261,7 +345,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -273,7 +359,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -285,7 +373,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -297,7 +387,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -309,7 +401,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -321,7 +415,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F # hardcoded to xyz
+            comp  = (opcode >> 21) & 0x0F # hardcoded to xyz
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -333,7 +429,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             fd    = (opcode >> 6)  & 0x1F
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fd)
             instruction.reg2 = get_f_name(fs)
@@ -345,7 +443,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             id    = (opcode >> 6)  & 0x1F
             _is   = (opcode >> 11) & 0x1F
             it    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F # hardcoded to none
+            comp  = (opcode >> 21) & 0x0F # hardcoded to none
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_i_name(id)
             instruction.reg2 = get_i_name(_is)
@@ -357,7 +457,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             id    = (opcode >> 6)  & 0x1F
             _is   = (opcode >> 11) & 0x1F
             it    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F # hardcoded to none
+            comp  = (opcode >> 21) & 0x0F # hardcoded to none
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_i_name(id)
             instruction.reg2 = get_i_name(_is)
@@ -367,7 +469,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # ACC.comp = VF[fs] + I
             instruction.name = "viaddi"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -379,7 +483,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             id    = (opcode >> 6)  & 0x1F
             _is   = (opcode >> 11) & 0x1F
             it    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F # hardcoded to none
+            comp  = (opcode >> 21) & 0x0F # hardcoded to none
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_i_name(id)
             instruction.reg2 = get_i_name(_is)
@@ -391,7 +497,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             id    = (opcode >> 6)  & 0x1F
             _is   = (opcode >> 11) & 0x1F
             it    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F # hardcoded to none
+            comp  = (opcode >> 21) & 0x0F # hardcoded to none
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_i_name(id)
             instruction.reg2 = get_i_name(_is)
@@ -428,7 +536,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             bcomp = (opcode >> 0)  & 0x03
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -440,7 +551,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             bcomp = (opcode >> 0)  & 0x03
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -452,7 +566,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             bcomp = (opcode >> 0)  & 0x03
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -464,7 +581,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             bcomp = (opcode >> 0)  & 0x03
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -475,7 +595,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vitof0"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
+
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
         case 0x11:
@@ -484,7 +607,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vitof4"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
+
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
         case 0x12:
@@ -493,7 +619,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vitof12"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
+
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
         case 0x13:
@@ -502,7 +631,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vitof15"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
+
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
         case 0x14:
@@ -511,7 +643,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vftoi0"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
+
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
         case 0x15:
@@ -520,7 +655,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vftoi4"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
+
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
         case 0x16:
@@ -529,7 +667,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vftoi12"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
+
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
         case 0x17:
@@ -538,7 +679,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vftoi15"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
+
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
         case 0x18 | 0x19 | 0x1A | 0x1B:
@@ -548,7 +692,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             bcomp = (opcode >> 0)  & 0x03
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -558,7 +705,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = VF[fs].comp * Q
             instruction.name = "vmulaq"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -569,7 +718,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vabs"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
@@ -578,7 +729,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = VF[fs].comp * I
             instruction.name = "vmulai"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -590,7 +743,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             bcomp = (opcode >> 0)  & 0x03 # harcoded to w
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F # hardcoded to xyz
+            comp  = (opcode >> 21) & 0x0F # hardcoded to xyz
+
+            instruction.broadcast_component    = decode_single_component_name(bcomp)
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fs)
             instruction.reg2 = get_f_name(ft)
@@ -599,7 +755,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = VF[fs].comp + Q
             instruction.name = "vaddaq"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -609,7 +767,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = ACC.comp + (VF[fs].comp * Q)
             instruction.name = "vmaddaq"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -619,7 +779,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = VF[fs].comp + I
             instruction.name = "vaddai"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -629,7 +791,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = ACC.comp + (VF[fs].comp * I)
             instruction.name = "vmaddai"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -639,7 +803,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = ACC.comp - (VF[fs].comp * Q)
             instruction.name = "vmsubaq"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -649,7 +815,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = VF[fs].comp - I
             instruction.name = "vsubai"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -659,7 +827,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # ACC.comp = ACC.comp - (VF[fs].comp * I)
             instruction.name = "vmsubai"
             fs    = (opcode >> 11) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -669,7 +839,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vadda"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -680,7 +852,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmadda"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -691,7 +865,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmula"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -702,7 +878,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vsuba"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -713,7 +891,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmsuba"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -724,7 +904,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vopmula"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F # hardcoded to xyz
+            comp  = (opcode >> 21) & 0x0F
+
+            # hardcoded to xyz
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -738,7 +921,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmove"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
@@ -748,7 +933,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmr32"
             fs    = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(fs)
@@ -759,7 +946,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vlqi"
             _is   = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_i_name(_is)
@@ -770,7 +959,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vsqi"
             fs    = (opcode >> 11) & 0x1F
             it    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fs)
             instruction.reg2 = get_i_name(it)
@@ -780,7 +971,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vlqd"
             _is   = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_i_name(_is)
@@ -790,7 +983,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vsqd"
             fs    = (opcode >> 11) & 0x1F
             it    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(fs)
             instruction.reg2 = get_i_name(it)
@@ -803,6 +998,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             fsf   = (opcode >> 21) & 0x03
             ftf   = (opcode >> 23) & 0x03
 
+            instruction.source0_component = decode_single_component_name(fsf)
+            instruction.source1_component = decode_single_component_name(ftf)
+
             instruction.reg1 = Q_REGISTER
             instruction.reg2 = get_f_name(fs)
             instruction.reg3 = get_f_name(ft)
@@ -812,6 +1010,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vsqrt"
             ft    = (opcode >> 16) & 0x1F
             ftf   = (opcode >> 23) & 0x03
+
+            instruction.source1_component = decode_single_component_name(ftf)
 
             instruction.reg1 = Q_REGISTER
             instruction.reg2 = get_f_name(ft)
@@ -823,6 +1023,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             ft    = (opcode >> 16) & 0x1F
             fsf   = (opcode >> 21) & 0x03
             ftf   = (opcode >> 23) & 0x03
+
+            instruction.source0_component = decode_single_component_name(fsf)
+            instruction.source1_component = decode_single_component_name(ftf)
 
             instruction.reg1 = Q_REGISTER
             instruction.reg2 = get_f_name(fs)
@@ -838,6 +1041,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             it    = (opcode >> 16) & 0x1F
             fsf   = (opcode >> 21) & 0x03
 
+            instruction.source0_component = decode_single_component_name(fsf)
+
             instruction.reg1 = get_i_name(it)
             instruction.reg2 = get_f_name(fs)
         case 0x3D:
@@ -846,7 +1051,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vmfir"
             _is   = (opcode >> 11) & 0x1F
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = get_f_name(_is)
@@ -856,7 +1063,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vilwr"
             _is   = (opcode >> 11) & 0x1F
             it    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_i_name(it)
             instruction.reg2 = get_i_name(_is)
@@ -866,7 +1075,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "viswr"
             _is   = (opcode >> 11) & 0x1F
             it    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_i_name(it)
             instruction.reg2 = get_i_name(_is)
@@ -875,7 +1086,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # VF[ft].comp = rand(R)
             instruction.name = "vrnext"
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = R_REGISTER
@@ -884,7 +1097,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # VF[ft].comp = R
             instruction.name = "vrget"
             ft    = (opcode >> 16) & 0x1F
-            comp  = (opcode >> 21) & 0x1F
+            comp  = (opcode >> 21) & 0x0F
+
+            instruction.destination_components = decode_component_bits(comp)
 
             instruction.reg1 = get_f_name(ft)
             instruction.reg2 = R_REGISTER
@@ -895,6 +1110,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             fs    = (opcode >> 11) & 0x1F
             fsf   = (opcode >> 21) & 0x03
 
+            instruction.source0_component = decode_single_component_name(fsf)
+
             instruction.reg1 = R_REGISTER
             instruction.reg2 = get_f_name(fs)
         case 0x43:
@@ -903,6 +1120,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             instruction.name = "vrxor"
             fs    = (opcode >> 11) & 0x1F
             fsf   = (opcode >> 21) & 0x03
+
+            instruction.source0_component = decode_single_component_name(fsf)
 
             instruction.reg1 = R_REGISTER
             instruction.reg2 = get_f_name(fs)

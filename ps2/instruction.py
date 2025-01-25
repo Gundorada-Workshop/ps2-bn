@@ -16,7 +16,8 @@ class InstructionType(Enum):
 class Instruction:
     __slots__ = [
         "type", "name", "branch_dest", "reg1", "reg2", "reg3", "operand", "il_func",
-        "arch", "cop_branch_type", "is_likely",
+        "arch", "cop_branch_type", "is_likely", "broadcast_component",
+        "destination_components", "source0_component", "source1_component"
     ]
 
     type: InstructionType
@@ -36,6 +37,10 @@ class Instruction:
     """
     If branch instruction, is it likely
     """
+    broadcast_component: Optional[str]
+    destination_components: Optional[str]
+    source0_component: Optional[str]
+    source1_component: Optional[str]
 
     def __init__(self):
         self.type = InstructionType.UNDEFINED
@@ -49,3 +54,7 @@ class Instruction:
         self.arch = None
         self.cop_branch_type = None
         self.is_likely = False
+        self.broadcast_component = None
+        self.destination_components = None
+        self.source0_component = None
+        self.source1_component = None
