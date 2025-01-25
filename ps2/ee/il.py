@@ -151,11 +151,13 @@ def jal(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     )
     
 def jr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.append(
-        il.jump(
-            il.reg(4, instruction.reg1)
-        )
-    )
+    if instruction.reg1 == instruction.arch.link_register:
+        # Assume this is a function return
+        expr = il.ret
+    else:
+        expr = il.jump
+    
+    il.append(expr(il.reg(4, instruction.reg1)))
 
 def _load(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int, sign_extend: bool) -> None:
     value = il.load(size, il.add(4, il.reg(4, instruction.reg2), il.const(4, instruction.operand)))
