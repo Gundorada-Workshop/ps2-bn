@@ -16,6 +16,7 @@ from .ps2.fpu.registers import FLOAT_ARG_REGS, FLOAT_RETURN_REG
 from .ps2.vu0.registers import i_registers as VU0IRegisters
 from .ps2.vu0.registers import f_registers as VU0FRegisters
 from .ps2.vu0.registers import c_registers as VU0CRegisters
+from .ps2.vu0.decode import component_bits_to_string, component_id_to_string
 from .ps2.cop0.registers import registers as COP0Registers
 from .ps2.cop0.registers import c_registers as COP0CRegisters
 from .ps2.intrinsics import PS2Intrinsic
@@ -99,11 +100,13 @@ class EmotionEngine(Architecture):
     def _get_instruction_name(self, instruction: Instruction) -> str:
         name = instruction.name
 
+        # cop2 vaddx
         if instruction.broadcast_component is not None:
-            name += instruction.broadcast_component
+            name += component_id_to_string(instruction.broadcast_component)
 
+        # cop2 vaddx.xyz
         if instruction.destination_components is not None:
-            name += f".{instruction.destination_components}"
+            name += f".{component_bits_to_string(instruction.destination_components)}"
 
         if instruction.type == InstructionType.Branch:
             if instruction.cop_branch_type is not None:
@@ -136,7 +139,7 @@ class EmotionEngine(Architecture):
         
         # Instruction name + spaces
         name = self._get_instruction_name(instruction)
-        pad = 7 # Spaces will be padded to a *multiple* of this length
+        pad = 20 # Spaces will be padded to a *multiple* of this length
         spaces = " " * ((pad - len(name)) % pad + 1)
         tokens.append(InstructionTextToken(InstructionTextTokenType.InstructionToken, name))
         tokens.append(InstructionTextToken(InstructionTextTokenType.TextToken, spaces))
@@ -144,13 +147,44 @@ class EmotionEngine(Architecture):
         match instruction.type:
             case IT.GenericInt:
                 if instruction.reg1 is not None:
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg1))
+                    register_name = instruction.reg1
+
+                    # note: no cop2 instruction with both source0 and dest components
+                    # no broadcast components should land here
+                    if instruction.source0_component is not None:
+                        register_name += component_id_to_string(instruction.source0_component)
+                    elif instruction.destination_components is not None:
+                        register_name += component_bits_to_string(instruction.destination_components)
+
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, register_name))
+
                 if instruction.reg2 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg2))
+
+                    register_name = instruction.reg2
+
+                    # note: no cop2 instruction with both source1 and dest components
+                    # it's possible to have the broadcast component on reg2 ie vclip
+                    if instruction.broadcast_component is not None and instruction.reg3 is None:
+                        register_name += component_id_to_string(instruction.broadcast_component)
+                    elif instruction.source1_component is not None:
+                        register_name += component_id_to_string(instruction.source1_component)
+                    elif instruction.destination_components is not None:
+                        register_name += component_bits_to_string(instruction.destination_components)
+
+
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, register_name))
                 if instruction.reg3 is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, instruction.reg3))
+
+                    register_name = instruction.reg3
+
+                    if instruction.broadcast_component is not None:
+                        register_name += component_id_to_string(instruction.broadcast_component)
+                    elif instruction.destination_components is not None:
+                        register_name += component_bits_to_string(instruction.destination_components)
+
+                    tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, register_name))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
                     str_func = hex if abs(instruction.operand) >= 10 else str

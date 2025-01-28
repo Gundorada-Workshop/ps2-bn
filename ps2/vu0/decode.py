@@ -40,10 +40,10 @@ field_bits_to_string = [
     'xyzw'
 ]
 
-def decode_component_bits(bits: int):
+def component_bits_to_string(bits: int):
     return field_bits_to_string[bits]
 
-def decode_single_component_name(id: int):
+def component_id_to_string(id: int):
     return component_bits[id & 0x03]
 
 def decode_destination_register_index(opcode: int) -> int:
@@ -101,11 +101,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vaddbc
             # VF[fd].comp = VF[fs].comp + VF[ft].bcomp
             instruction.name = "vadd"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -115,11 +113,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vsubbc
             # VF[fd].comp = VF[fs].comp - VF[ft].bcomp
             instruction.name = "vsub"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -128,11 +124,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmaddbc
             # VF[fd].comp = ACC.comp + (VF[fs].comp * VF[ft].bcomp)
             instruction.name = "vmadd"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -141,11 +135,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmsubbc
             # VF[fd].comp = ACC.comp - (VF[fs].comp * VF[ft].bcomp)
             instruction.name = "vmsub"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -154,11 +146,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmaxbc
             # VF[fd].comp = max(VF[fs].comp, VF[ft].bcomp)
             instruction.name = "vmax"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -167,11 +157,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vminibc
             # VF[fd].comp = min(VF[fs].comp, VF[ft].bcomp)
             instruction.name = "vmini"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -180,11 +168,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmulbc
             # VF[fd].comp = VF[fs].comp + VF[ft].bcomp
             instruction.name = "vmul"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -193,9 +179,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmulq
             # VF[fd].comp = VF[fs].comp * Q
             instruction.name = "vmulq"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -204,9 +189,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmaxi
             # VF[fd].comp = max(VF[fs].comp, I)
             instruction.name = "vmaxi"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -215,9 +199,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmuli
             # VF[fd].comp = VF[fs].comp * I
             instruction.name = "vmuli"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -226,9 +209,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vminii
             # VF[fd].comp = min(VF[fs].comp, I)
             instruction.name = "vminii"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -237,9 +219,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vaddq
             # VF[fd].comp = VF[fs].comp + Q
             instruction.name = "vaddq"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -248,9 +229,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmaddq
             # VF[fd].comp = ACC + (VF[fs].comp * Q)
             instruction.name = "vmaddq"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -259,9 +239,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vaddi
             # VF[fd].comp = VF[fs].comp + I
             instruction.name = "vaddi"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -270,9 +249,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmaddi
             # VF[fd].comp = ACC.comp + (VF[fs].comp * I)
             instruction.name = "vmaddi"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -281,9 +259,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vsubq
             # VF[fd].comp = VF[fs].comp - Q
             instruction.name = "vsubq"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -292,9 +269,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmsubq
             # VF[fd].comp = ACC.comp - (VF[fs].comp * Q)
             instruction.name = "vmsubq"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -303,9 +279,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vsubi
             # VF[fd].comp = VF[fs.comp] - I
             instruction.name = "vsubi"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -314,9 +289,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmsubi
             # VF[fd] = ACC.comp - (VF[fs].comp * I)
             instruction.name = "vmsubi"
-            comp = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -325,9 +299,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vadd
             # VF[fd].comp = VF[fs].comp + VF[ft].comp
             instruction.name = "vadd"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -336,9 +309,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmadd
             # VF[vd].comp = ACC.comp + (VF[fs] * VF[ft])
             instruction.name = "vmadd"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -347,9 +319,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmul
             # VF[fd].comp = VF[fs].comp * VF[ft].comp
             instruction.name = "vmul"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -358,9 +329,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmax
             # VF[fd].comp = max(VF[fs].comp, VF[ft].comp)
             instruction.name = "vmax"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -369,9 +339,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vsub
             # VF[fd].comp = VF[fs].comp - VF[ft].comp
             instruction.name = "vsub"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -380,9 +349,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmsub
             # VF[fd].comp = ACC.comp - (VF[fs].comp * VF[vt].comp)
             instruction.name = "vmsub"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -391,9 +359,9 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vopmsub
             # VF[fd].xyz = ACC.xyz - VF[fs].xyz * VF[ft].xyz
             instruction.name = "vopmsub"
-            comp  = decode_destination_component_bits(opcode) # hardcoded to xyz
 
-            instruction.destination_components = decode_component_bits(comp)
+            # hardcoded to xyz
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -402,9 +370,8 @@ def decode_cop2_special(opcode: int, addr: int) -> Instruction:
             # vmini
             # VF[fd].comp = min(VF[fs].comp, VF[ft].comp)
             instruction.name = "vmini"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_destination_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -478,11 +445,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vaddabc
             # ACC.comp = VF[fs].comp + VF[ft].bcomp
             instruction.name = "vadda"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -491,11 +456,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vsubabc
             # ACC.comp = VF[fs].comp - VF[ft].bcomp
             instruction.name = "vsuba"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -504,11 +467,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmaddabc
             # ACC.comp = ACC.comp + (VF[fs].comp * VF[ft].bcomp)
             instruction.name = "vmadda"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -517,11 +478,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmsubabc
             # ACC.comp = ACC.comp - (VF[fs].comp * VF[ft].bcomp)
             instruction.name = "vmsuba"
-            bcomp = decode_broadcast_component_id(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -530,9 +489,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vitof0
             # VF[ft] = ToF32FromFixedPoint0(VF[fs])
             instruction.name = "vitof0"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -540,9 +498,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vitof4
             # VF[ft] = ToF32FromFixedPoint4(VF[fs])
             instruction.name = "vitof4"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -550,9 +507,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vitof12
             # VF[ft] = ToF32FromFixedPoint12(VF[fs])
             instruction.name = "vitof12"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -560,9 +516,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vitof15
             # VF[ft] = ToF32FromFixedPoint15(VF[fs])
             instruction.name = "vitof15"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -570,9 +525,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vftoi0
             # VF[ft] = ToFixedPoint0FromF32(VF[fs])
             instruction.name = "vftoi0"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -580,10 +534,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vftoi4
             # VF[ft] = ToFixedPoint4FromF32(VF[fs])
             instruction.name = "vftoi4"
-            ft    = decode_temp_register_index(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -591,10 +543,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vftoi12
             # VF[ft] = ToFixedPoint12FromF32(VF[fs])
             instruction.name = "vftoi12"
-            ft    = decode_temp_register_index(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -602,10 +552,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vftoi15
             # VF[ft] = ToFixedPoint15FromF32(VF[fs])
             instruction.name = "vftoi15"
-            ft    = decode_temp_register_index(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -613,12 +561,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmulabc
             # ACC.comp = VF[fs].comp * VF[ft].bcomp
             instruction.name = "vmula"
-            bcomp = decode_broadcast_component_id(opcode)
-            ft    = decode_temp_register_index(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -627,9 +572,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmulaq
             # ACC.comp = VF[fs].comp * Q
             instruction.name = "vmulaq"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -638,10 +582,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vabs
             # VF[ft].comp = abs(VF[fs].comp)
             instruction.name = "vabs"
-            ft    = decode_temp_register_index(opcode)
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -649,9 +591,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmulai
             # ACC.comp = VF[fs].comp * I
             instruction.name = "vmulai"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -660,12 +601,10 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vclip
             # CF = clip(VF[fs].xyz, VF[ft].w)
             instruction.name = "vclip"
-            bcomp = decode_broadcast_component_id(opcode) # harcoded to w
-            ft    = decode_temp_register_index(opcode)
-            comp  = decode_destination_component_bits(opcode) # hardcoded to xyz
 
-            instruction.broadcast_component    = decode_single_component_name(bcomp)
-            instruction.destination_components = decode_component_bits(comp)
+            # harcoded to w and xyz
+            instruction.broadcast_component    = decode_broadcast_component_id(opcode)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_source_register_name_float(opcode)
             instruction.reg2 = decode_temp_register_name_float(opcode)
@@ -673,9 +612,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vaddaq
             # ACC.comp = VF[fs].comp + Q
             instruction.name = "vaddaq"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -684,9 +622,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmaddaq
             # ACC.comp = ACC.comp + (VF[fs].comp * Q)
             instruction.name = "vmaddaq"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -695,9 +632,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vaddai
             # ACC.comp = VF[fs].comp + I
             instruction.name = "vaddai"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -706,9 +642,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmaddai
             # ACC.comp = ACC.comp + (VF[fs].comp * I)
             instruction.name = "vmaddai"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -717,9 +652,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmsubaq
             # ACC.comp = ACC.comp - (VF[fs].comp * Q)
             instruction.name = "vmsubaq"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -728,9 +662,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vsubai
             # ACC.comp = VF[fs].comp - I
             instruction.name = "vsubai"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -739,9 +672,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmsubai
             # ACC.comp = ACC.comp - (VF[fs].comp * I)
             instruction.name = "vmsubai"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -749,9 +681,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
         case 0x28:
             # vadda ACC.comp = VF[fs].comp + VF[ft].comp
             instruction.name = "vadda"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -760,9 +691,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmadda
             # ACC.comp = ACC.comp + (VF[fs].comp * VF[ft].comp)
             instruction.name = "vmadda"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -771,9 +701,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmula
             # ACC.comp = VF[fs].comp * VF[ft].comp
             instruction.name = "vmula"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -782,9 +711,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vsuba
             # ACC.comp = VF[fs].comp - VF[ft].comp
             instruction.name = "vsuba"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -793,9 +721,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmsuba
             # ACC.comp = ACC.comp - (VF[fs].comp * VF[ft].comp)
             instruction.name = "vmsuba"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -804,10 +731,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vopmula
             # ACC.xyz = VF[fs].xyz * VF[ft].xyz
             instruction.name = "vopmula"
-            comp  = decode_destination_component_bits(opcode)
 
             # hardcoded to xyz
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = ACC_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -819,9 +745,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmove
             # VF[ft].comp = VF[fs].comp
             instruction.name = "vmove"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -829,9 +754,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmr32
             # VF[ft].comp = rotate_right(VF[ft])
             instruction.name = "vmr32"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -840,9 +764,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # VF[ft].comp = read(VI[is]).comp
             # VF[ft]++
             instruction.name = "vlqi"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_int(opcode)
@@ -851,9 +774,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # write(VI[it], VF[fs].comp)
             # VI[it]++
             instruction.name = "vsqi"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_source_register_name_float(opcode)
             instruction.reg2 = decode_temp_register_name_int(opcode)
@@ -861,9 +783,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vlqd
             # VF[ft] = read(VI[is]--)
             instruction.name = "vlqd"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_int(opcode)
@@ -871,9 +792,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vsqd
             # write(VI[it]--, VF[fs].comp)
             instruction.name = "vsqd"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_source_register_name_float(opcode)
             instruction.reg2 = decode_temp_register_name_int(opcode)
@@ -881,11 +801,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vdiv
             # Q = VF[fs].fsf / VF[ft].ftf
             instruction.name = "vdiv"
-            fsf   = decode_source_component_id(opcode)
-            ftf   = decode_temp_component_id(opcode)
 
-            instruction.source0_component = decode_single_component_name(fsf)
-            instruction.source1_component = decode_single_component_name(ftf)
+            instruction.source0_component = decode_source_component_id(opcode)
+            instruction.source1_component = decode_temp_component_id(opcode)
 
             instruction.reg1 = Q_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -894,9 +812,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vsrqt
             # Q = sqrt(VF[ft].ftf)
             instruction.name = "vsqrt"
-            ftf   = decode_temp_component_id(opcode)
 
-            instruction.source1_component = decode_single_component_name(ftf)
+            instruction.source1_component = decode_temp_component_id(opcode)
 
             instruction.reg1 = Q_REGISTER
             instruction.reg2 = decode_temp_register_name_float(opcode)
@@ -904,11 +821,9 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vrsqrt
             # Q = VF[fs].fsf / sqrt(VF[ft].ftf)
             instruction.name = "vrsqrt"
-            fsf   = decode_source_component_id(opcode)
-            ftf   = decode_temp_component_id(opcode)
 
-            instruction.source0_component = decode_single_component_name(fsf)
-            instruction.source1_component = decode_single_component_name(ftf)
+            instruction.source0_component = decode_source_component_id(opcode)
+            instruction.source1_component = decode_temp_component_id(opcode)
 
             instruction.reg1 = Q_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -920,9 +835,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmtir
             # VI[it] = trunc16(VF[fs].fsf)
             instruction.name = "vmtir"
-            fsf   = decode_source_component_id(opcode)
 
-            instruction.source0_component = decode_single_component_name(fsf)
+            instruction.source0_component = decode_source_component_id(opcode)
 
             instruction.reg1 = decode_temp_register_name_int(opcode)
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -930,9 +844,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vmfir
             # VF[ft].comp = VI[is]
             instruction.name = "vmfir"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = decode_source_register_name_int(opcode)
@@ -940,9 +853,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vilwr
             # VI[it].comp = read(VI[is]).comp
             instruction.name = "vilwr"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_int(opcode)
             instruction.reg2 = decode_source_register_name_int(opcode)
@@ -950,9 +862,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # viswr
             # write(VI[is], read(VI[it]).comp)
             instruction.name = "viswr"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_int(opcode)
             instruction.reg2 = decode_source_register_name_int(opcode)
@@ -960,9 +871,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vrnext
             # VF[ft].comp = rand(R)
             instruction.name = "vrnext"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = R_REGISTER
@@ -970,9 +880,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vrget
             # VF[ft].comp = R
             instruction.name = "vrget"
-            comp  = decode_destination_component_bits(opcode)
 
-            instruction.destination_components = decode_component_bits(comp)
+            instruction.destination_components = decode_destination_component_bits(opcode)
 
             instruction.reg1 = decode_temp_register_name_float(opcode)
             instruction.reg2 = R_REGISTER
@@ -980,9 +889,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vrinit
             # R = VF[fs].fsf
             instruction.name = "vrinit"
-            fsf   = decode_source_component_id(opcode)
 
-            instruction.source0_component = decode_single_component_name(fsf)
+            instruction.source0_component = decode_source_component_id(opcode)
 
             instruction.reg1 = R_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
@@ -990,9 +898,8 @@ def decode_cop2_special2(opcode: int, addr: int) -> Instruction:
             # vrxor
             # R = VF[fs].fsf ^ R
             instruction.name = "vrxor"
-            fsf   = decode_source_component_id(opcode)
 
-            instruction.source0_component = decode_single_component_name(fsf)
+            instruction.source0_component = decode_source_component_id(opcode)
 
             instruction.reg1 = R_REGISTER
             instruction.reg2 = decode_source_register_name_float(opcode)
