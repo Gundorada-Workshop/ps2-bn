@@ -25,7 +25,8 @@ from binaryninja.architecture import Architecture
 from binaryninja.callingconvention import CallingConvention
 from binaryninja.enums import InstructionTextTokenType, BranchType
 from binaryninja.function import RegisterInfo, InstructionInfo, InstructionTextToken
-from binaryninja.lowlevelil import LowLevelILConst, LowLevelILInstruction, LowLevelILLabel
+from binaryninja.lowlevelil import LowLevelILConst, LowLevelILInstruction, LowLevelILLabel, LowLevelILOperation, \
+    LowLevelILSetReg, LowLevelILIf, LowLevelILCall, LowLevelILReg, LLIL_TEMP
 
 class PS2CdeclCall(CallingConvention):
     caller_saved_regs = EE_CALLER_SAVED_REGS + FPU_CALLER_SAVED_REGS
@@ -248,11 +249,70 @@ class EmotionEngine(Architecture):
                 if instruction2.il_func is not None:
                     instruction2.il_func(instruction2, addr + 4, il)
                 il.mark_label(f)
+
+                instruction1.il_func(instruction1, addr + 4, il)
             else:
                 # Normal branch
+                # https://github.com/Vector35/binaryninja-api/blob/dev/arch/mips/arch_mips.cpp#L543
+                # Do what the regular MIPS architecture does and use a temp register
+                # to store the value of any potentially clobbered registers. This will
+                # generate more correct IL in the case of something like:
+                # beqz v0, label
+                # li v0, 1
+
+                # Add a nop we can replace to store the value set in the delay slot
+                il.set_current_address(addr + 4)
+                nop = il.nop()
+                il.append(nop)
+
                 instruction2 = decode(data[4:8], addr + 4)
                 if instruction2.il_func is not None:
                     instruction2.il_func(instruction2, addr + 4, il)
+                
+                instr_index = il.get_expr_count()
+                clobbered = None
+                if instr_index != 0:
+                    # FIXME: Like the regular arch, we're assuming here that the last
+                    # instruction is what clobbers the register, when it might not be
+                    # or there may be multiple instructions which do so.
+                    delayed = il.get_expr(instr_index - 1)
+                    if isinstance(delayed, LowLevelILSetReg) and \
+                        delayed.address == addr + 4:
+                        clobbered = delayed.dest
+            
+                il.set_current_address(addr)
+                instruction1.il_func(instruction1, addr, il)
+
+                if clobbered is not None:
+                    lifted = None
+                    for i in range(instr_index, il.get_expr_count()):
+                        # Try and find our if_expr expression
+                        expr = il.get_expr(i)
+                        if isinstance(expr, (LowLevelILIf, LowLevelILCall)) and \
+                            expr.address == addr:
+                            lifted = expr
+                            break
+                    if lifted is not None:
+                        replace = False
+                        temp = LLIL_TEMP(1)
+
+                        # Replace any if conditions with a check against the clobbered register
+                        # to instead use a temp register, which will be set later.
+                        def traversal_cb(expr: LowLevelILInstruction) -> None:
+                            if isinstance(expr, LowLevelILReg) and expr.src == clobbered:
+                                return expr
+
+                        for expr in lifted.traverse(traversal_cb):
+                            replace = True
+                            il.replace_expr(expr, il.reg(expr.size, temp))
+
+                        if replace:
+                            # Replace the NOP we created at the beginning with an assigment
+                            # to the temp register from the clobbered register.
+                            il.set_current_address(addr + 4)
+                            il.replace_expr(nop, il.set_reg(delayed.size, temp, il.reg(delayed.size, delayed.dest)))
+                            il.set_current_address(addr)
+        else:
+            instruction1.il_func(instruction1, addr, il)
         
-        instruction1.il_func(instruction1, addr, il)
         return length
