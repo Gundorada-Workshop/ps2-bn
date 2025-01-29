@@ -242,15 +242,53 @@ class EmotionEngine(Architecture):
                 # Only do the branch delay slot if the branch condition is true
                 cond = get_branch_cond_expr(instruction1, addr, il)
 
+                t = None
+                f = None
+                t_dest = il.const(4, instruction1.branch_dest)
+                f_dest = il.const(4, addr + 8)
+                t_indirect = False
+                f_indirect = False
+                instr1 = LowLevelILInstruction.create(il, t_dest)
+                instr2 = LowLevelILInstruction.create(il, f_dest)
+                if isinstance(instr1, LowLevelILConst):
+                    t = il.get_label_for_address(self, instr1.constant)
+                if t is None:
+                    t_indirect = True
+                    t = LowLevelILLabel()
+                if isinstance(instr2, LowLevelILConst):
+                    f = il.get_label_for_address(self, instr2.constant)
+                if f is None:
+                    f_indirect = True
+                    f = LowLevelILLabel()
+
+                done = LowLevelILLabel()
+                il.append(il.if_expr(cond, t, f))
+                if t_indirect:
+                    il.mark_label(t)
+                    if instruction2.il_func is not None:
+                        instruction2.il_func(instruction2, addr + 4, il)
+                    il.append(il.jump(t_dest))
+                    il.append(il.goto(done))
+                if f_indirect:
+                    il.mark_label(f)
+                    il.append(il.jump(f_dest))
+                il.mark_label(done)
+
+                """
                 t = LowLevelILLabel()
                 f = LowLevelILLabel()
+                done = LowLevelILLabel()
                 il.append(il.if_expr(cond, t, f))
                 il.mark_label(t)
+                il.set_current_address(addr + 4)
                 if instruction2.il_func is not None:
                     instruction2.il_func(instruction2, addr + 4, il)
+                il.jump(instruction1.branch_dest)
+                il.goto(done)
                 il.mark_label(f)
-
-                instruction1.il_func(instruction1, addr + 4, il)
+                il.jump(addr + 8)
+                il.mark_label(done)
+                """
             else:
                 # Normal branch
                 # https://github.com/Vector35/binaryninja-api/blob/dev/arch/mips/arch_mips.cpp#L543
