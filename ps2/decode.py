@@ -31,42 +31,49 @@ def decode_regimm(opcode: int, addr: int) -> Instruction:
             # bltz
             instruction.type = IT.Branch
             instruction.name = "bltz"
+            instruction.il_func = ee_func.bltz
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x01:
             # bgez
             instruction.type = IT.Branch
             instruction.name = "bgez"
+            instruction.il_func = ee_func.bgez
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x02:
             # bltzl
             instruction.type = IT.Branch
             instruction.name = "bltzl"
+            instruction.il_func = ee_func.bltzl
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x03:
             # bgezl
             instruction.type = IT.Branch
             instruction.name = "bgezl"
+            instruction.il_func = ee_func.bgezl
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x10:
             # bltzal
             instruction.type = IT.Branch
             instruction.name = "bltzal"
+            instruction.il_func = ee_func.bltzal
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x11:
             # bgezal
             instruction.type = IT.Branch
             instruction.name = "bgezal"
+            instruction.il_func = ee_func.bgezal
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x12:
             # bltzall
             instruction.type = IT.Branch
             instruction.name = "bltzall"
+            instruction.il_func = ee_func.bltzall
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
             instruction.is_likely = True
@@ -74,6 +81,7 @@ def decode_regimm(opcode: int, addr: int) -> Instruction:
             # bgezall
             instruction.type = IT.Branch
             instruction.name = "bgezall"
+            instruction.il_func = ee_func.bgezall
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
             instruction.is_likely = True
@@ -1481,12 +1489,14 @@ def decode(data: bytes, addr: int) -> Instruction:
             # blez
             instruction.type = IT.Branch
             instruction.name = "blez"
+            instruction.il_func = ee_func.blez
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x07:
             # bgtz
             instruction.type = IT.Branch
             instruction.name = "bgtz"
+            instruction.il_func = ee_func.bgtz
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
         case 0x08:
