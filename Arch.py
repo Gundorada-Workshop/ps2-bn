@@ -77,7 +77,7 @@ class EmotionEngine(Architecture):
                     if instruction.reg1 == EmotionEngine.link_register:
                         result.add_branch(BranchType.FunctionReturn)
                     else:
-                        result.add_branch(BranchType.IndirectBranch)
+                        result.add_branch(BranchType.UnresolvedBranch)
                 case "jal":
                     result.add_branch(BranchType.CallDestination, instruction.branch_dest)
                 case "jalr":
