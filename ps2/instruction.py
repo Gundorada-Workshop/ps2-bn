@@ -1,6 +1,6 @@
 from __future__ import annotations
 from enum import Enum, auto, unique
-from typing import Optional, Callable, Type, TYPE_CHECKING
+from typing import Optional, Callable, Type, Union, TYPE_CHECKING
 from binaryninja.architecture import RegisterName
 
 if TYPE_CHECKING:
@@ -26,7 +26,7 @@ class Instruction:
     reg1: Optional[RegisterName]
     reg2: Optional[RegisterName]
     reg3: Optional[RegisterName]
-    operand: Optional[str]
+    operand: Optional[Union[int, float]]
     il_func: Optional[Callable]
     arch: Optional[Type[EmotionEngine]]
     cop_branch_type: Optional[bool]

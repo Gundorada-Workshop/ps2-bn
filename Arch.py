@@ -43,7 +43,8 @@ class EmotionEngine(Architecture):
     address_size     = 4
     default_int_size = 4
     instr_alignment  = 4
-    max_instr_length = 8 # Branch + Branch delay slot
+    max_instr_length = 12 # 8 is needed for branches, but up to 12 can be consumed for li.s construct
+    WANT_PSEUDO_OP = True
 
     regs = EERegisters | COP0Registers | COP0CRegisters | FPURegisters | FPUCRegisters | VU0IRegisters | VU0FRegisters | VU0CRegisters
     intrinsics = {
@@ -126,11 +127,13 @@ class EmotionEngine(Architecture):
         if len(data) < 4:
             return None
 
-        instruction = decode(data[0:4], addr)
-
-        # Converts instruction properties to that of a psuedo-operation
-        # e.g. beq zero, zero -> b or addiu v0, zero, 1 -> li v0, 1
-        convert_to_pseudo(instruction)
+        if EmotionEngine.WANT_PSEUDO_OP:
+            # Converts instruction properties to that of a psuedo-operation
+            # e.g. beq zero, zero -> b or addiu v0, zero, 1 -> li v0, 1
+            instruction, length = convert_to_pseudo(data, addr)
+        else:
+            length = 4
+            instruction = decode(data[0:4], addr)
 
         IT = InstructionType
         tokens = []
@@ -188,8 +191,11 @@ class EmotionEngine(Architecture):
                     tokens.append(InstructionTextToken(InstructionTextTokenType.RegisterToken, register_name))
                 if instruction.operand is not None:
                     tokens.append(InstructionTextToken(InstructionTextTokenType.OperandSeparatorToken, EmotionEngine.operand_separator))
-                    str_func = hex if abs(instruction.operand) >= 10 else str
-                    tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str_func(instruction.operand)))
+                    if isinstance(instruction.operand, float):
+                        tokens.append(InstructionTextToken(InstructionTextTokenType.FloatingPointToken, f"{instruction.operand}f"))
+                    else:
+                        str_func = hex if abs(instruction.operand) >= 10 else str
+                        tokens.append(InstructionTextToken(InstructionTextTokenType.IntegerToken, str_func(instruction.operand)))
             case IT.Branch:
 
 
@@ -215,7 +221,7 @@ class EmotionEngine(Architecture):
             # Remove spaces from instruction only text
             del tokens[1]
 
-        return tokens, 4
+        return tokens, length
     
     def get_instruction_low_level_il(self, data: bytes, addr: int, il: 'lowlevelil.LowLevelILFunction') -> Optional[int]:
         if len(data) < 4:

@@ -1,5 +1,7 @@
+import struct
+from typing import Optional, Tuple
 from .ee import il as ee_func
-from .ee.registers import ZERO_REG
+from .ee.registers import ZERO_REG, AT_REG
 from .ee.registers import get_name as ee_get_name
 from .fpu.registers import get_name as fpu_get_name
 from .vu0.registers import get_f_name as vu0f_get_name
@@ -1832,10 +1834,67 @@ def decode(data: bytes, addr: int) -> Instruction:
         
     return instruction
 
-def convert_to_pseudo(instruction: Instruction) -> None:
+def convert_to_pseudo(data: bytes, addr: int) -> Tuple[Optional[Instruction], int]:
     """
     Modifies an instruction for the text disasm step so that a psuedo operation can be displayed instead.
     """
+    if len(data) < 4:
+        return (None, 0)
+
+    instruction = decode(data[0:4], addr)
+
+    # Check for 2-instruction pair li
+    if instruction.name == "lui":
+        if len(data) >= 8:
+            instruction2 = decode(data[4:8], addr + 4)
+            if instruction2.name in ("addi", "addiu") and \
+                    instruction2.reg1 == instruction.reg1 and \
+                    instruction2.reg2 == instruction.reg1:
+                # 2-instruction li
+                imm = instruction.operand << 16
+                imm += instruction2.operand
+                instruction.name = "li"
+                instruction.reg2 = None
+                instruction.reg3 = None
+                instruction.operand = imm
+                return instruction, 8
+            if instruction2.name == "ori" and \
+                instruction2.reg1 == instruction.reg1 and \
+                instruction2.reg2 == instruction.reg1:
+                imm = instruction.operand << 16
+                imm |= instruction2.operand
+                instruction.name = "li"
+                instruction.reg2 = None
+                instruction.reg3 = None
+                instruction.operand = imm
+                return instruction, 8
+
+    # check for 2-pair li.s
+    if instruction.name == "lui" and len(data) >= 8 and instruction.reg1 == AT_REG:
+        instruction2 = decode(data[4:8], addr + 4)
+        if instruction2.name == "mtc1" and instruction2.reg1 == AT_REG:
+            imm = (instruction.operand << 16).to_bytes(4, "little")
+            imm = struct.unpack('f', imm)[0]
+            instruction.name = "li.s"
+            instruction.reg1 = instruction2.reg2
+            instruction.operand = imm
+            return instruction, 8
+
+    # check for 3-pair li.s
+    if instruction.name == "lui" and len(data) >= 12 and instruction.reg1 == AT_REG:
+        instruction2 = decode(data[4:8], addr + 4)
+        if instruction2.name == "ori" and instruction2.reg1 == instruction2.reg2 == AT_REG:
+            instruction3 = decode(data[8:12], addr + 8)
+            if instruction3.name == "mtc1" and instruction3.reg1 == AT_REG:
+                imm = instruction.operand << 16
+                imm |= instruction2.operand
+                imm = (imm).to_bytes(4, "little")
+                imm = struct.unpack('f', imm)[0]
+                instruction.name = "li.s"
+                instruction.reg1 = instruction3.reg2
+                instruction.operand = imm
+                return instruction, 12
+
     match instruction.name:
         case "addi" | "addiu":
             if instruction.reg2 == ZERO_REG:
@@ -1912,6 +1971,12 @@ def convert_to_pseudo(instruction: Instruction) -> None:
                 # dmove
                 instruction.name = "dmove"
                 instruction.reg3 = None
+        case "dsubu":
+            # dnegu
+            if instruction.reg2 == ZERO_REG:
+                instruction.name = "dnegu"
+                instruction.reg2 = instruction.reg3
+                instruction.reg3 = None
         case "paddb" | "paddh" | "paddw" | "paddub" | "padduh" | "padduw":
             if instruction.reg2 == ZERO_REG:
                 # qmove
@@ -1922,3 +1987,11 @@ def convert_to_pseudo(instruction: Instruction) -> None:
                 # qmove
                 instruction.name = "qmove"
                 instruction.reg3 = None
+        case "subu":
+            # negu
+            if instruction.reg2 == ZERO_REG:
+                instruction.name = "negu"
+                instruction.reg2 = instruction.reg3
+                instruction.reg3 = None
+
+    return instruction, 4
