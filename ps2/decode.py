@@ -1605,6 +1605,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # blezl
             instruction.type = IT.Branch
             instruction.name = "blezl"
+            instruction.il_func = ee_func.blezl
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
             instruction.is_likely = True
@@ -1612,6 +1613,7 @@ def decode(data: bytes, addr: int) -> Instruction:
             # bgtzl
             instruction.type = IT.Branch
             instruction.name = "bgtzl"
+            instruction.il_func = ee_func.bgtzl
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
             instruction.branch_dest = get_branch_dest(opcode, addr)
             instruction.is_likely = True
