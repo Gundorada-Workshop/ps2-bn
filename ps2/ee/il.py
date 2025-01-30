@@ -165,6 +165,24 @@ def daddu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None
 def di(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.intrinsic([], PS2Intrinsic.DI, []))
 
+def dsll(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _sll(instruction, addr, il, 8, il.const(1, instruction.operand))
+
+def dsll32(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _sll(instruction, addr, il, 8, il.const(1, instruction.operand + 32))
+
+def dsra(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _sra(instruction, addr, il, 8, il.const(1, instruction.operand))
+
+def dsra32(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _sra(instruction, addr, il, 8, il.const(1, instruction.operand + 32))
+
+def dsrl(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _srl(instruction, addr, il, 8, il.const(1, instruction.operand))
+
+def dsrl32(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _srl(instruction, addr, il, 8, il.const(1, instruction.operand + 32))
+
 def ei(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.intrinsic([], PS2Intrinsic.EI, []))
 
@@ -227,9 +245,12 @@ def ori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 
     il.append(il.set_reg(4, instruction.reg1, expr))
 
+def _sll(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int, shift: ExpressionIndex) -> None:
+    val = il.shift_left(size, il.reg(size, instruction.reg2), shift)
+    il.append(il.set_reg(size, instruction.reg1, val))
+
 def sll(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    val = il.shift_left(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
-    il.append(il.set_reg(4, instruction.reg1, val))
+    _sll(instruction, addr, il, 4, il.const(1, instruction.operand))
 
 def slt(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.reg(4, instruction.reg3)
@@ -259,13 +280,19 @@ def sltu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 
     il.append(il.set_reg(4, instruction.reg1, expr))
 
+def _sra(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int, shift: ExpressionIndex) -> None:
+    val = il.arith_shift_right(size, il.reg(size, instruction.reg2), shift)
+    il.append(il.set_reg(size, instruction.reg1, val))
+
 def sra(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    val = il.arith_shift_right(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
-    il.append(il.set_reg(4, instruction.reg1, val))
+    _sra(instruction, addr, il, 4, il.const(1, instruction.operand))
+
+def _srl(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int, shift: ExpressionIndex) -> None:
+    val = il.logical_shift_right(size, il.reg(size, instruction.reg2), shift)
+    il.append(il.set_reg(size, instruction.reg1, val))
 
 def srl(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    val = il.logical_shift_right(4, il.reg(4, instruction.reg2), il.const(1, instruction.operand))
-    il.append(il.set_reg(4, instruction.reg1, val))
+    _srl(instruction, addr, il, 4, il.const(1, instruction.operand))
 
 def _store(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
     value = None

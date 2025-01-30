@@ -666,6 +666,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsll
             instruction.type = IT.GenericInt
             instruction.name = "dsll"
+            instruction.il_func = ee_func.dsll
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = (opcode >> 6) & 0x1F
@@ -673,6 +674,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsrl
             instruction.type = IT.GenericInt
             instruction.name = "dsrl"
+            instruction.il_func = ee_func.dsrl
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = (opcode >> 6) & 0x1F
@@ -680,6 +682,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsra
             instruction.type = IT.GenericInt
             instruction.name = "dsra"
+            instruction.il_func = ee_func.dsra
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = (opcode >> 6) & 0x1F
@@ -687,6 +690,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsll32
             instruction.type = IT.GenericInt
             instruction.name = "dsll32"
+            instruction.il_func = ee_func.dsll32
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = (opcode >> 6) & 0x1F
@@ -694,6 +698,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsrl32
             instruction.type = IT.GenericInt
             instruction.name = "dsrl32"
+            instruction.il_func = ee_func.dsrl32
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = (opcode >> 6) & 0x1F
@@ -701,6 +706,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsra32
             instruction.type = IT.GenericInt
             instruction.name = "dsra32"
+            instruction.il_func = ee_func.dsra32
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.operand = (opcode >> 6) & 0x1F
