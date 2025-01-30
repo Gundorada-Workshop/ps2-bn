@@ -46,6 +46,16 @@ def _addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: i
 def addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _addu(instruction, addr, il, 4)
 
+def ee_and(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
+    sreg1 = il.reg(4, instruction.reg2)
+    sreg2 = il.reg(4, instruction.reg3)
+
+    expr = il.and_expr(4, sreg1, sreg2)
+    if instruction.reg2 == ZERO_REG or instruction.reg3 == ZERO_REG:
+        expr = il.const(4, 0)
+        
+    il.append(il.set_reg(4, instruction.reg1, expr))
+
 def andi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     sreg = il.reg(4, instruction.reg2)
     imm = il.const(4, instruction.operand)
@@ -235,6 +245,40 @@ def lui(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def nop(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.nop())
 
+def ee_nor(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
+    sr1 = instruction.reg2
+    sr2 = instruction.reg3
+    sreg1 = il.reg(4, sr1)
+    sreg2 = il.reg(4, sr2)
+    not_sreg1 = il.not_expr(4, sreg1)
+    not_sreg2 = il.not_expr(4, sreg2)
+
+    expr = il.xor_expr(4, sreg1, sreg2)
+    if sr1 == ZERO_REG and sr2 == ZERO_REG:
+        expr = il.const(4, 0xFFFFFFFF)
+    elif sr1 == ZERO_REG:
+        expr = not_sreg2
+    elif sr2 == ZERO_REG:
+        expr = not_sreg1
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
+
+def ee_or(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
+    sr1 = instruction.reg2
+    sr2 = instruction.reg3
+    sreg1 = il.reg(4, sr1)
+    sreg2 = il.reg(4, sr2)
+
+    expr = il.or_expr(4, sreg1, sreg2)
+    if sr1 == ZERO_REG and sr2 == ZERO_REG:
+        expr = il.const(4, 0)
+    elif sr1 == ZERO_REG:
+        expr = sreg2
+    elif sr2 == ZERO_REG:
+        expr = sreg1
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
+
 def ori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     sreg = il.reg(4, instruction.reg2)
     imm = il.const(4, instruction.operand)
@@ -312,6 +356,22 @@ sw  = lambda instruction, addr, il: _store(instruction, addr, il, 4)
 
 def syscall(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.system_call())
+
+def ee_xor(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    sr1 = instruction.reg2
+    sr2 = instruction.reg3
+    sreg1 = il.reg(4, sr1)
+    sreg2 = il.reg(4, sr2)
+
+    expr = il.xor_expr(4, sreg1, sreg2)
+    if sr1 == sr2:
+        expr = il.const(4, 0)
+    elif sr1 == ZERO_REG:
+        expr = sreg2
+    elif sr2 == ZERO_REG:
+        expr = sreg1
+
+    il.append(il.set_reg(4, instruction.reg1, expr))
 
 def xori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     sreg = il.reg(4, instruction.reg2)

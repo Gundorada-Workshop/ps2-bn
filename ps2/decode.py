@@ -576,6 +576,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # and
             instruction.type = IT.GenericInt
             instruction.name = "and"
+            instruction.il_func = ee_func.ee_and
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -583,6 +584,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # or
             instruction.type = IT.GenericInt
             instruction.name = "or"
+            instruction.il_func = ee_func.ee_or
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -590,6 +592,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # xor
             instruction.type = IT.GenericInt
             instruction.name = "xor"
+            instruction.il_func = ee_func.ee_xor
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -597,6 +600,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # nor
             instruction.type = IT.GenericInt
             instruction.name = "nor"
+            instruction.il_func = ee_func.ee_nor
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
