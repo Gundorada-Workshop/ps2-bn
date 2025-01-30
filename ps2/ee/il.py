@@ -253,7 +253,7 @@ def ee_nor(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
     not_sreg1 = il.not_expr(4, sreg1)
     not_sreg2 = il.not_expr(4, sreg2)
 
-    expr = il.xor_expr(4, sreg1, sreg2)
+    expr = il.or_expr(4, sreg1, sreg2)
     if sr1 == ZERO_REG and sr2 == ZERO_REG:
         expr = il.const(4, 0xFFFFFFFF)
     elif sr1 == ZERO_REG:
