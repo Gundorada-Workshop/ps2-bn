@@ -483,21 +483,25 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # mfhi
             instruction.type = IT.GenericInt
             instruction.name = "mfhi"
+            instruction.il_func = ee_func.mfhi
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
         case 0x11:
             # mthi
             instruction.type = IT.GenericInt
             instruction.name = "mthi"
+            instruction.il_func = ee_func.mthi
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x12:
             # mflo
             instruction.type = IT.GenericInt
             instruction.name = "mflo"
+            instruction.il_func = ee_func.mflo
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
         case 0x13:
             # mtlo
             instruction.type = IT.GenericInt
             instruction.name = "mtlo"
+            instruction.il_func = ee_func.mtlo
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x14:
             # dsllv
@@ -524,24 +528,30 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # mult
             instruction.type = IT.GenericInt
             instruction.name = "mult"
-            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
-            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.il_func = ee_func.mult
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x19:
             # multu
             instruction.type = IT.GenericInt
             instruction.name = "multu"
-            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
-            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.il_func = ee_func.multu
+            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x1A:
             # div
             instruction.type = IT.GenericInt
             instruction.name = "div"
+            instruction.il_func = ee_func.div
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x1B:
             # divu
             instruction.type = IT.GenericInt
             instruction.name = "divu"
+            instruction.il_func = ee_func.divu
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x20:
@@ -752,26 +762,31 @@ def decode_mmi(opcode: int, addr: int) -> Instruction:
             # mfhi1
             instruction.type = IT.GenericInt
             instruction.name = "mfhi1"
+            instruction.il_func = ee_func.mfhi1
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
         case 0x11:
             # mthi1
             instruction.type = IT.GenericInt
             instruction.name = "mthi1"
+            instruction.il_func = ee_func.mthi1
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x12:
             # mflo1
             instruction.type = IT.GenericInt
             instruction.name = "mflo1"
+            instruction.il_func = ee_func.mflo1
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
         case 0x13:
             # mtlo1
             instruction.type = IT.GenericInt
             instruction.name = "mtlo1"
+            instruction.il_func = ee_func.mtlo1
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x18:
             # mult1
             instruction.type = IT.GenericInt
             instruction.name = "mult1"
+            instruction.il_func = ee_func.mult1
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -779,6 +794,7 @@ def decode_mmi(opcode: int, addr: int) -> Instruction:
             # multu1
             instruction.type = IT.GenericInt
             instruction.name = "multu1"
+            instruction.il_func = ee_func.multu1
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -786,16 +802,16 @@ def decode_mmi(opcode: int, addr: int) -> Instruction:
             # div1
             instruction.type = IT.GenericInt
             instruction.name = "div1"
-            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
-            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
-            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.il_func = ee_func.div1
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x1B:
             # divu1
             instruction.type = IT.GenericInt
             instruction.name = "divu1"
-            instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
-            instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
-            instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
+            instruction.il_func = ee_func.divu1
+            instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
+            instruction.reg2 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x20:
             # madd1
             instruction.type = IT.GenericInt

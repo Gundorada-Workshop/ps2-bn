@@ -35,6 +35,8 @@ FP_REG = RegisterName("$fp")
 RA_REG = RegisterName("$ra")
 LO_REG = RegisterName("$lo")
 HI_REG = RegisterName("$hi")
+LO1_REG = RegisterName("$lo1")
+HI1_REG = RegisterName("$hi1")
 PC_REG = RegisterName("$pc")
 SA_REG = RegisterName("$sa")
 
@@ -93,8 +95,10 @@ register_params: List[Tuple[RegisterName, int]] = [
     (SP_REG, 16),      # 29
     (FP_REG, 16),      # 30
     (RA_REG, 16),      # 31
-    (LO_REG, 16),                   # special
-    (HI_REG, 16),                   # special
+    (LO_REG, 8),                    # special
+    (HI_REG, 8),                    # special
+    (LO1_REG, 8),                   # special
+    (HI1_REG, 8),                   # special
     (PC_REG, 4),                    # special
     (SA_REG, 8),                    # special
 ]
