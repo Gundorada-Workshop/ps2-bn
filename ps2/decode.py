@@ -466,6 +466,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # movz
             instruction.type = IT.GenericInt
             instruction.name = "movz"
+            instruction.il_func = ee_func.movz
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -473,6 +474,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # movn
             instruction.type = IT.GenericInt
             instruction.name = "movn"
+            instruction.il_func = ee_func.movn
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)

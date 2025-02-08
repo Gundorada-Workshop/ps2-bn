@@ -320,6 +320,19 @@ def mflo(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def mflo1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.set_reg(8, instruction.reg1, il.reg(8, LO1_REG)))
 
+def _cond_move(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    cond = get_move_cond_expr(instruction, addr, il)
+    t = LowLevelILLabel()
+    f = LowLevelILLabel()
+
+    il.append(il.if_expr(cond, t, f))
+    il.mark_label(t)
+    il.append(il.set_reg(8, instruction.reg1, il.reg(8, instruction.reg2)))
+    il.mark_label(f)
+
+movn = _cond_move
+movz = _cond_move
+
 def _mtc(instruction: Instruction, addr: int, il: 'LowLevelILFunction', cop_id: int) -> None:
     size = 16 if cop_id == 2 else 4
     il.append(il.set_reg(size, instruction.reg2, il.reg(size, instruction.reg1)))
@@ -601,6 +614,23 @@ def xori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
         expr = imm
 
     il.append(il.set_reg(4, instruction.reg1, expr))
+
+def get_move_cond_expr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> ExpressionIndex:
+    # For movz, movn
+    r3 = instruction.reg3
+
+    if r3 == ZERO_REG:
+        test = il.const(8, 0)
+    else:
+        test = il.reg(8, r3)
+
+    match instruction.name:
+        case "movn":
+            return il.compare_not_equal(8, test, il.const(8, 0))
+        case "movz":
+            return il.compare_equal(8, test, il.const(8, 0))
+        case _:
+            raise ValueError(f"Unexpected conditional move operation {instruction.name}")
 
 def get_branch_cond_expr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> ExpressionIndex:
     # Returns the comparison for a branch (ignoring unconditional branches)
