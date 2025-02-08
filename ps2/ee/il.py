@@ -221,17 +221,26 @@ def dsll(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def dsll32(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _sll(instruction, addr, il, 8, il.const(1, instruction.operand + 32))
 
+def dsllv(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _sllv(instruction, addr, il, 8)
+
 def dsra(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _sra(instruction, addr, il, 8, il.const(1, instruction.operand))
 
 def dsra32(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _sra(instruction, addr, il, 8, il.const(1, instruction.operand + 32))
 
+def dsrav(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _srav(instruction, addr, il, 8)
+
 def dsrl(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _srl(instruction, addr, il, 8, il.const(1, instruction.operand))
 
 def dsrl32(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _srl(instruction, addr, il, 8, il.const(1, instruction.operand + 32))
+
+def dsrlv(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _srlv(instruction, addr, il, 8)
 
 def ei(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.intrinsic([], PS2Intrinsic.EI, []))
@@ -424,6 +433,14 @@ def _sll(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int,
 def sll(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _sll(instruction, addr, il, 4, il.const(1, instruction.operand))
 
+def _sllv(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
+    # NOTE: Technically this should read 5 bits (for sllv) or 6 bits (for dsllv) from rs but it's probably fine
+    val = il.shift_left(size, il.reg(size, instruction.reg2), il.reg(1, instruction.reg3))
+    il.append(il.set_reg(size, instruction.reg1, val))
+
+def sllv(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _sllv(instruction, addr, il, 4)
+
 def slt(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.reg(4, instruction.reg3)
     source = il.reg(4, instruction.reg2)
@@ -459,12 +476,28 @@ def _sra(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int,
 def sra(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _sra(instruction, addr, il, 4, il.const(1, instruction.operand))
 
+def _srav(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
+    # NOTE: Technically this should read 5 bits (for sllv) or 6 bits (for dsllv) from rs but it's probably fine
+    val = il.arith_shift_right(size, il.reg(size, instruction.reg2), il.reg(1, instruction.reg3))
+    il.append(il.set_reg(size, instruction.reg1, val))
+
+def srav(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _srav(instruction, addr, il, 4)
+
 def _srl(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int, shift: ExpressionIndex) -> None:
     val = il.logical_shift_right(size, il.reg(size, instruction.reg2), shift)
     il.append(il.set_reg(size, instruction.reg1, val))
 
 def srl(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _srl(instruction, addr, il, 4, il.const(1, instruction.operand))
+
+def _srlv(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
+    # NOTE: Technically this should read 5 bits (for sllv) or 6 bits (for dsllv) from rs but it's probably fine
+    val = il.logical_shift_right(size, il.reg(size, instruction.reg2), il.reg(1, instruction.reg3))
+    il.append(il.set_reg(size, instruction.reg1, val))
+
+def srlv(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _srlv(instruction, addr, il, 4)
 
 def _store(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
     value = None

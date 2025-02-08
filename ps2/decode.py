@@ -423,6 +423,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # sllv
             instruction.type = IT.GenericInt
             instruction.name = "sllv"
+            instruction.il_func = ee_func.sllv
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -430,6 +431,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # srlv
             instruction.type = IT.GenericInt
             instruction.name = "srlv"
+            instruction.il_func = ee_func.srlv
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -437,6 +439,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # srav
             instruction.type = IT.GenericInt
             instruction.name = "srav"
+            instruction.il_func = ee_func.srav
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -507,6 +510,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsllv
             instruction.type = IT.GenericInt
             instruction.name = "dsllv"
+            instruction.il_func = ee_func.dsllv
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -514,6 +518,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsrlv
             instruction.type = IT.GenericInt
             instruction.name = "dsrlv"
+            instruction.il_func = ee_func.srlv
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -521,6 +526,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsrav
             instruction.type = IT.GenericInt
             instruction.name = "dsrav"
+            instruction.il_func = ee_func.dsrav
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
