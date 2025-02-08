@@ -249,17 +249,18 @@ class EmotionEngine(Architecture):
 
                 t = LowLevelILLabel()
                 f = LowLevelILLabel()
-                done = LowLevelILLabel()
                 il.append(il.if_expr(cond, t, f))
                 il.mark_label(t)
                 il.set_current_address(addr + 4)
                 if instruction2.il_func is not None:
                     instruction2.il_func(instruction2, addr + 4, il)
-                il.jump(instruction1.branch_dest)
-                il.goto(done)
+                il.set_current_address(addr)
+                t_label = il.get_label_for_address(self, instruction1.branch_dest)
+                if t_label:
+                    il.append(il.goto(t_label))
+                else:
+                    il.append(il.jump(instruction1.branch_dest))
                 il.mark_label(f)
-                il.jump(addr + 8)
-                il.mark_label(done)
             else:
                 # Normal branch
                 # https://github.com/Vector35/binaryninja-api/blob/dev/arch/mips/arch_mips.cpp#L543
@@ -274,7 +275,6 @@ class EmotionEngine(Architecture):
                 nop = il.nop()
                 il.append(nop)
 
-                instruction2 = decode(data[4:8], addr + 4)
                 if instruction2.il_func is not None:
                     instruction2.il_func(instruction2, addr + 4, il)
                 
