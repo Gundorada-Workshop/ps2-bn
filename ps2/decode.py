@@ -461,6 +461,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # jalr
             instruction.type = IT.Branch
             instruction.name = "jalr"
+            instruction.il_func = ee_func.jalr
             instruction.reg1 = ee_get_name((opcode >> 21) & 0x1F)
         case 0x0A:
             # movz

@@ -20,7 +20,10 @@ def _addi(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: i
         # addiu
         value = il.add(size, il.reg(size, instruction.reg2), il.const(size, instruction.operand))
 
-    il.append(il.set_reg(size, instruction.reg1, value))
+    if size < 8:
+        value = il.sign_extend(8, value)
+
+    il.append(il.set_reg(8, instruction.reg1, value))
 
 def addiu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _addi(instruction, addr, il, 4)
@@ -41,30 +44,33 @@ def _add(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: in
         # addu
         value = il.add(size, il.reg(size, r2), il.reg(size, r3))
     
-    il.append(il.set_reg(size, r1, value))
+    if size < 8:
+        value = il.sign_extend(8, value)
+
+    il.append(il.set_reg(8, r1, value))
 
 def addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _add(instruction, addr, il, 4)
 
 def ee_and(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
-    sreg1 = il.reg(4, instruction.reg2)
-    sreg2 = il.reg(4, instruction.reg3)
+    sreg1 = il.reg(8, instruction.reg2)
+    sreg2 = il.reg(8, instruction.reg3)
 
-    expr = il.and_expr(4, sreg1, sreg2)
+    expr = il.and_expr(8, sreg1, sreg2)
     if instruction.reg2 == ZERO_REG or instruction.reg3 == ZERO_REG:
-        expr = il.const(4, 0)
+        expr = il.const(8, 0)
         
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def andi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    sreg = il.reg(4, instruction.reg2)
-    imm = il.const(4, instruction.operand)
+    sreg = il.reg(8, instruction.reg2)
+    imm = il.const(8, instruction.operand)
 
-    expr = il.and_expr(4, sreg, imm)
+    expr = il.and_expr(8, sreg, imm)
     if instruction.reg2 == ZERO_REG:
-        expr = il.const(4, 0)
+        expr = il.const(8, 0)
         
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def _unconditional_branch(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(
@@ -261,7 +267,10 @@ def jal(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
             )
         )
     )
-    
+
+def jalr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    il.append(il.call(il.reg(4, instruction.reg1)))
+
 def jr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     if instruction.reg1 == instruction.arch.link_register:
         # Assume this is a function return
@@ -296,11 +305,17 @@ lwc1 = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend
 
 def lui(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.const(4, instruction.operand << 16)
-    il.append(il.set_reg(4, instruction.reg1, val))
+    val = il.sign_extend(8, val)
+    il.append(il.set_reg(8, instruction.reg1, val))
 
 def _mfc(instruction: Instruction, addr: int, il: 'LowLevelILFunction', cop_id: int) -> None:
     size = 16 if cop_id == 2 else 4
-    il.append(il.set_reg(size, instruction.reg1, il.reg(size, instruction.reg2)))
+
+    val = il.reg(size, instruction.reg2)
+    if size < 8:
+        val = il.sign_extend(8, val)
+
+    il.append(il.set_reg(max(size, 8), instruction.reg1, val))
 
 def mfc0(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _mfc(instruction, addr, il, 0)
@@ -425,46 +440,46 @@ def nop(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def ee_nor(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
     sr1 = instruction.reg2
     sr2 = instruction.reg3
-    sreg1 = il.reg(4, sr1)
-    sreg2 = il.reg(4, sr2)
-    not_sreg1 = il.not_expr(4, sreg1)
-    not_sreg2 = il.not_expr(4, sreg2)
+    sreg1 = il.reg(8, sr1)
+    sreg2 = il.reg(8, sr2)
+    not_sreg1 = il.not_expr(8, sreg1)
+    not_sreg2 = il.not_expr(8, sreg2)
 
-    expr = il.or_expr(4, not_sreg1, not_sreg2)
+    expr = il.or_expr(8, not_sreg1, not_sreg2)
     if sr1 == ZERO_REG and sr2 == ZERO_REG:
-        expr = il.const(4, 0xFFFFFFFF)
+        expr = il.const(8, 0xFFFFFFFF_FFFFFFFF)
     elif sr1 == ZERO_REG:
         expr = not_sreg2
     elif sr2 == ZERO_REG:
         expr = not_sreg1
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def ee_or(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
     sr1 = instruction.reg2
     sr2 = instruction.reg3
-    sreg1 = il.reg(4, sr1)
-    sreg2 = il.reg(4, sr2)
+    sreg1 = il.reg(8, sr1)
+    sreg2 = il.reg(8, sr2)
 
-    expr = il.or_expr(4, sreg1, sreg2)
+    expr = il.or_expr(8, sreg1, sreg2)
     if sr1 == ZERO_REG and sr2 == ZERO_REG:
-        expr = il.const(4, 0)
+        expr = il.const(8, 0)
     elif sr1 == ZERO_REG:
         expr = sreg2
     elif sr2 == ZERO_REG:
         expr = sreg1
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def ori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    sreg = il.reg(4, instruction.reg2)
-    imm = il.const(4, instruction.operand)
+    sreg = il.reg(8, instruction.reg2)
+    imm = il.const(8, instruction.operand)
 
-    expr = il.or_expr(4, sreg, imm)
+    expr = il.or_expr(8, sreg, imm)
     if instruction.reg2 == ZERO_REG:
         expr = imm
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def qmfc2(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _mfc(instruction, addr, il, 2)
@@ -474,6 +489,10 @@ def qmtc2(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None
 
 def _sll(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int, shift: ExpressionIndex) -> None:
     val = il.shift_left(size, il.reg(size, instruction.reg2), shift)
+
+    if size < 8:
+        val = il.sign_extend(8, val)
+
     il.append(il.set_reg(size, instruction.reg1, val))
 
 def sll(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
@@ -482,42 +501,50 @@ def sll(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def _sllv(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
     # NOTE: Technically this should read 5 bits (for sllv) or 6 bits (for dsllv) from rs but it's probably fine
     val = il.shift_left(size, il.reg(size, instruction.reg2), il.reg(1, instruction.reg3))
+
+    if size < 8:
+        val = il.sign_extend(8, val)
+
     il.append(il.set_reg(size, instruction.reg1, val))
 
 def sllv(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _sllv(instruction, addr, il, 4)
 
 def slt(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    val = il.reg(4, instruction.reg3)
-    source = il.reg(4, instruction.reg2)
-    expr = il.compare_signed_less_than(4, source, val)
+    val = il.reg(8, instruction.reg3)
+    source = il.reg(8, instruction.reg2)
+    expr = il.compare_signed_less_than(8, source, val)
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def slti(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    val = il.const(4, instruction.operand)
-    source = il.reg(4, instruction.reg2)
-    expr = il.compare_signed_less_than(4, source, val)
+    val = il.const(8, instruction.operand)
+    source = il.reg(8, instruction.reg2)
+    expr = il.compare_signed_less_than(8, source, val)
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def sltiu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    val = il.const(4, instruction.operand)
-    source = il.reg(4, instruction.reg2)
-    expr = il.compare_unsigned_less_than(4, source, val)
+    val = il.const(8, instruction.operand)
+    source = il.reg(8, instruction.reg2)
+    expr = il.compare_unsigned_less_than(8, source, val)
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def sltu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    val = il.reg(4, instruction.reg3)
-    source = il.reg(4, instruction.reg2)
-    expr = il.compare_unsigned_less_than(4, source, val)
+    val = il.reg(8, instruction.reg3)
+    source = il.reg(8, instruction.reg2)
+    expr = il.compare_unsigned_less_than(8, source, val)
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def _sra(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int, shift: ExpressionIndex) -> None:
     val = il.arith_shift_right(size, il.reg(size, instruction.reg2), shift)
-    il.append(il.set_reg(size, instruction.reg1, val))
+
+    if size < 8:
+        val = il.sign_extend(8, val)
+
+    il.append(il.set_reg(8, instruction.reg1, val))
 
 def sra(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _sra(instruction, addr, il, 4, il.const(1, instruction.operand))
@@ -525,7 +552,11 @@ def sra(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def _srav(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
     # NOTE: Technically this should read 5 bits (for sllv) or 6 bits (for dsllv) from rs but it's probably fine
     val = il.arith_shift_right(size, il.reg(size, instruction.reg2), il.reg(1, instruction.reg3))
-    il.append(il.set_reg(size, instruction.reg1, val))
+
+    if size < 8:
+        val = il.sign_extend(8, val)
+
+    il.append(il.set_reg(8, instruction.reg1, val))
 
 def srav(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _srav(instruction, addr, il, 4)
@@ -540,7 +571,11 @@ def srl(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 def _srlv(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
     # NOTE: Technically this should read 5 bits (for sllv) or 6 bits (for dsllv) from rs but it's probably fine
     val = il.logical_shift_right(size, il.reg(size, instruction.reg2), il.reg(1, instruction.reg3))
-    il.append(il.set_reg(size, instruction.reg1, val))
+
+    if size < 8:
+        val = il.sign_extend(8, val)
+
+    il.append(il.set_reg(8, instruction.reg1, val))
 
 def srlv(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _srlv(instruction, addr, il, 4)
@@ -578,8 +613,11 @@ def _sub(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int)
     else:
         # subu
         value = il.sub(size, il.reg(size, r2), il.reg(size, r3))
+
+    if size < 8:
+        value = il.sign_extend(8, value)
     
-    il.append(il.set_reg(size, r1, value))
+    il.append(il.set_reg(8, r1, value))
 
 def sub(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
     _sub(instruction, addr, il, 4)
@@ -592,28 +630,28 @@ def syscall(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> No
 def ee_xor(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     sr1 = instruction.reg2
     sr2 = instruction.reg3
-    sreg1 = il.reg(4, sr1)
-    sreg2 = il.reg(4, sr2)
+    sreg1 = il.reg(8, sr1)
+    sreg2 = il.reg(8, sr2)
 
-    expr = il.xor_expr(4, sreg1, sreg2)
+    expr = il.xor_expr(8, sreg1, sreg2)
     if sr1 == sr2:
-        expr = il.const(4, 0)
+        expr = il.const(8, 0)
     elif sr1 == ZERO_REG:
         expr = sreg2
     elif sr2 == ZERO_REG:
         expr = sreg1
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def xori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    sreg = il.reg(4, instruction.reg2)
-    imm = il.const(4, instruction.operand)
+    sreg = il.reg(8, instruction.reg2)
+    imm = il.const(8, instruction.operand)
 
-    expr = il.xor_expr(4, sreg, imm)
+    expr = il.xor_expr(8, sreg, imm)
     if instruction.reg2 == ZERO_REG:
         expr = imm
 
-    il.append(il.set_reg(4, instruction.reg1, expr))
+    il.append(il.set_reg(8, instruction.reg1, expr))
 
 def get_move_cond_expr(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> ExpressionIndex:
     # For movz, movn
