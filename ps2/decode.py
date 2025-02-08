@@ -1,6 +1,7 @@
 import struct
 from typing import Optional, Tuple
 from .ee import il as ee_func
+from .fpu import il as fpu_func
 from .ee.registers import ZERO_REG, AT_REG
 from .ee.registers import get_name as ee_get_name
 from .fpu.registers import get_name as fpu_get_name
@@ -214,6 +215,7 @@ def decode_cop(opcode: int, addr: int) -> Instruction:
             # cvt.s.w
             instruction.type = IT.GenericInt
             instruction.name = "cvt.s.w"
+            instruction.il_func = fpu_func.cvt_s_w
             instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
             instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
         case 0x201:
@@ -346,6 +348,7 @@ def decode_cop_s(opcode: int, addr: int) -> Instruction:
             # cvt.w.s
             instruction.type = IT.GenericInt
             instruction.name = "cvt.w.s"
+            instruction.il_func = fpu_func.cvt_w_s
             instruction.reg1 = fpu_get_name((opcode >> 6) & 0x1F)
             instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
         case 0x28:
