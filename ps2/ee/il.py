@@ -6,12 +6,12 @@ from binaryninja.architecture import Architecture
 from binaryninja.lowlevelil import LowLevelILFunction, LowLevelILLabel, LowLevelILInstruction, ExpressionIndex, LowLevelILConst
 
 def add(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    _addu(instruction, addr, il, 4)
+    _add(instruction, addr, il, 4)
 
 def addi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    _addiu(instruction, addr, il, 4)
+    _addi(instruction, addr, il, 4)
 
-def _addiu(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
+def _addi(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
     value = None
     if instruction.reg2 == ZERO_REG:
         # li
@@ -23,9 +23,9 @@ def _addiu(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: 
     il.append(il.set_reg(size, instruction.reg1, value))
 
 def addiu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    _addiu(instruction, addr, il, 4)
+    _addi(instruction, addr, il, 4)
 
-def _addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
+def _add(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: int) -> None:
     value = None
     r1, r2, r3 = instruction.reg1, instruction.reg2, instruction.reg3
     if r2 == ZERO_REG and r3 == ZERO_REG:
@@ -44,7 +44,7 @@ def _addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: i
     il.append(il.set_reg(size, r1, value))
 
 def addu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    _addu(instruction, addr, il, 4)
+    _add(instruction, addr, il, 4)
 
 def ee_and(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
     sreg1 = il.reg(4, instruction.reg2)
@@ -161,16 +161,16 @@ def bnel(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
     bne(instruction, addr, il)
 
 def dadd(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    _addu(instruction, addr, il, 8)
+    _add(instruction, addr, il, 8)
 
 def daddi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    _addiu(instruction, addr, il, 8)
+    _addi(instruction, addr, il, 8)
 
 def daddiu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    _addiu(instruction, addr, il, 8)
+    _addi(instruction, addr, il, 8)
 
 def daddu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    _addu(instruction, addr, il, 8)
+    _add(instruction, addr, il, 8)
 
 def di(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.intrinsic([], PS2Intrinsic.DI, []))
@@ -241,6 +241,11 @@ def dsrl32(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> Non
 
 def dsrlv(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _srlv(instruction, addr, il, 8)
+
+def dsub(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
+    _sub(instruction, addr, il, 8)
+
+dsubu = dsub
 
 def ei(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.intrinsic([], PS2Intrinsic.EI, []))
@@ -544,6 +549,29 @@ sq   = lambda instruction, addr, il: _store(instruction, addr, il, 16)
 sqc2 = lambda instruction, addr, il: _store(instruction, addr, il, 16)
 sw   = lambda instruction, addr, il: _store(instruction, addr, il, 4)
 swc1 = lambda instruction, addr, il: _store(instruction, addr, il, 4)
+
+def _sub(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int) -> None:
+    value = None
+    r1, r2, r3 = instruction.reg1, instruction.reg2, instruction.reg3
+    if r2 == ZERO_REG and r3 == ZERO_REG:
+        # move zero for some reason
+        value = il.const(size, 0)
+    elif r2 == ZERO_REG:
+        # negate
+        value = il.neg_expr(size, il.reg(size, r3))
+    elif r3 == ZERO_REG:
+        # move (why?)
+        value = il.reg(size, r2)
+    else:
+        # subu
+        value = il.sub(size, il.reg(size, r2), il.reg(size, r3))
+    
+    il.append(il.set_reg(size, r1, value))
+
+def sub(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
+    _sub(instruction, addr, il, 4)
+
+subu = sub
 
 def syscall(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.system_call())

@@ -588,6 +588,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # sub
             instruction.type = IT.GenericInt
             instruction.name = "sub"
+            instruction.il_func = ee_func.sub
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -595,6 +596,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # subu
             instruction.type = IT.GenericInt
             instruction.name = "subu"
+            instruction.il_func = ee_func.subu
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -676,6 +678,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsub
             instruction.type = IT.GenericInt
             instruction.name = "dsub"
+            instruction.il_func = ee_func.dsub
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
@@ -683,6 +686,7 @@ def decode_special(opcode: int, addr: int) -> Instruction:
             # dsubu
             instruction.type = IT.GenericInt
             instruction.name = "dsubu"
+            instruction.il_func = ee_func.dsubu
             instruction.reg1 = ee_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg3 = ee_get_name((opcode >> 21) & 0x1F)
