@@ -1,5 +1,5 @@
 from .registers import registers as gpr
-from .registers import ZERO_REG, LO_REG, HI_REG, LO1_REG, HI1_REG
+from .registers import ZERO_REG, LO_REG, HI_REG, LO1_REG, HI1_REG, SP_REG
 from ..instruction import Instruction
 from ..intrinsics import PS2Intrinsic
 from binaryninja.architecture import Architecture
@@ -21,9 +21,13 @@ def _addi(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: i
         value = il.add(size, il.reg(size, instruction.reg2), il.const(size, instruction.operand))
 
     if size < 8:
-        value = il.sign_extend(8, value)
+        if instruction.reg1 != SP_REG: # HACK to prevent function prologue/epilogue junk in IL
+            value = il.sign_extend(8, value)
+            size = 8
+        else:
+            size = 4
 
-    il.append(il.set_reg(8, instruction.reg1, value))
+    il.append(il.set_reg(size, instruction.reg1, value))
 
 def addiu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _addi(instruction, addr, il, 4)
