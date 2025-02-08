@@ -639,14 +639,14 @@ def get_branch_cond_expr(instruction: Instruction, addr: int, il: 'LowLevelILFun
     r2 = instruction.reg2
     
     if r1 == ZERO_REG:
-        val1 = il.const(4, 0)
+        val1 = il.const(8, 0)
     else:
-        val1 = il.reg(4, instruction.reg1)
+        val1 = il.reg(8, instruction.reg1)
 
     if r2 == ZERO_REG or r2 is None:
-        val2 = il.const(4, 0)
+        val2 = il.const(8, 0)
     else:
-        val2 = il.reg(4, instruction.reg2)
+        val2 = il.reg(8, instruction.reg2)
 
     match instruction.name:
         case "bc0":
@@ -656,16 +656,16 @@ def get_branch_cond_expr(instruction: Instruction, addr: int, il: 'LowLevelILFun
         case "bc2":
             return il.unimplemented()
         case "beq" | "beql":
-            return il.compare_equal(4, val1, val2)
+            return il.compare_equal(8, val1, val2)
         case "bgez" | "bgezl" | "bgezal" | "bgezall":
-            return il.compare_signed_greater_equal(4, val1, il.const(4, 0))
+            return il.compare_signed_greater_equal(8, val1, il.const(8, 0))
         case "bgtz" | "bgtzl":
-            return il.compare_signed_greater_than(4, val1, il.const(4, 0))
+            return il.compare_signed_greater_than(8, val1, il.const(8, 0))
         case "blez" | "blezl":
-            return il.compare_signed_less_equal(4, val1, il.const(4, 0))
+            return il.compare_signed_less_equal(8, val1, il.const(8, 0))
         case "bltz" | "bltzl" | "bltzal" | "bltzall":
-            return il.compare_signed_less_than(4, val1, il.const(4, 0))
+            return il.compare_signed_less_than(8, val1, il.const(8, 0))
         case "bne" | "bnel":
-            return il.compare_not_equal(4, val1, val2)
+            return il.compare_not_equal(8, val1, val2)
         case _:
             raise ValueError(f"Unexpected branch operation {instruction.name}")
