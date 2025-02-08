@@ -283,28 +283,28 @@ def lui(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.set_reg(4, instruction.reg1, val))
 
 def mfhi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.set_reg(8, instruction.reg1, il.reg(8, HI_REG))
+    il.append(il.set_reg(8, instruction.reg1, il.reg(8, HI_REG)))
 
 def mfhi1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.set_reg(8, instruction.reg1, il.reg(8, HI1_REG))
+    il.append(il.set_reg(8, instruction.reg1, il.reg(8, HI1_REG)))
 
 def mflo(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.set_reg(8, instruction.reg1, il.reg(8, LO_REG))
+    il.append(il.set_reg(8, instruction.reg1, il.reg(8, LO_REG)))
 
 def mflo1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.set_reg(8, instruction.reg1, il.reg(8, LO1_REG))
+    il.append(il.set_reg(8, instruction.reg1, il.reg(8, LO1_REG)))
 
 def mthi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.set_reg(8, HI_REG, il.reg(8, instruction.reg1))
+    il.append(il.set_reg(8, HI_REG, il.reg(8, instruction.reg1)))
 
 def mthi1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.set_reg(8, HI1_REG, il.reg(8, instruction.reg1))
+    il.append(il.set_reg(8, HI1_REG, il.reg(8, instruction.reg1)))
 
 def mtlo(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.set_reg(8, LO_REG, il.reg(8, instruction.reg1))
+    il.append(il.set_reg(8, LO_REG, il.reg(8, instruction.reg1)))
 
 def mtlo1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
-    il.set_reg(8, LO1_REG, il.reg(8, instruction.reg1))
+    il.append(il.set_reg(8, LO1_REG, il.reg(8, instruction.reg1)))
 
 def mult(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     sreg1 = il.reg(4, instruction.reg2)
@@ -315,52 +315,60 @@ def mult(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     # lo[0..63] = sign_extend(8, prod[0..31])
     # hi[0..63] = sign_extend(8, prod[32..63])
     mult_expr = il.mult_double_prec_signed(4, sreg1, sreg2)
-    lo_expr = il.arith_shift_right(8, il.shift_left(8, mult_expr, il.const(1, 32)), il.const(1, 32))
+    lo_expr = mult_expr
     hi_expr = il.arith_shift_right(8, mult_expr, il.const(1, 32))
 
+    il.append(il.set_reg(8, LO1_REG, lo_expr))
+    il.append(il.set_reg(8, LO1_REG, il.sign_extend(8, il.reg(4, LO1_REG))))
+    il.append(il.set_reg(8, HI1_REG, hi_expr))
     if instruction.reg1 != ZERO_REG:
         il.append(il.set_reg(8, instruction.reg1, lo_expr)) # R5900 also allows for a destination register for this opcode
-    il.append(il.set_reg(8, LO_REG, lo_expr))
-    il.append(il.set_reg(8, HI_REG, hi_expr))
+        il.append(il.set_reg(8, instruction.reg1, il.sign_extend(8, il.reg(4, instruction.reg1))))
 
 def mult1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     sreg1 = il.reg(4, instruction.reg2)
     sreg2 = il.reg(4, instruction.reg3)
 
     mult_expr = il.mult_double_prec_signed(4, sreg1, sreg2)
-    lo_expr = il.arith_shift_right(8, il.shift_left(8, mult_expr, il.const(1, 32)), il.const(1, 32))
+    lo_expr = mult_expr
     hi_expr = il.arith_shift_right(8, mult_expr, il.const(1, 32))
 
-    if instruction.reg1 != ZERO_REG:
-        il.append(il.set_reg(8, instruction.reg1, lo_expr))
     il.append(il.set_reg(8, LO1_REG, lo_expr))
+    il.append(il.set_reg(8, LO1_REG, il.sign_extend(8, il.reg(4, LO1_REG))))
     il.append(il.set_reg(8, HI1_REG, hi_expr))
+    if instruction.reg1 != ZERO_REG:
+        il.append(il.set_reg(8, instruction.reg1, lo_expr)) # R5900 also allows for a destination register for this opcode
+        il.append(il.set_reg(8, instruction.reg1, il.sign_extend(8, il.reg(4, instruction.reg1))))
 
 def multu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     sreg1 = il.reg(4, instruction.reg2)
     sreg2 = il.reg(4, instruction.reg3)
 
     mult_expr = il.mult_double_prec_unsigned(4, sreg1, sreg2)
-    lo_expr = il.arith_shift_right(8, il.shift_left(8, mult_expr, il.const(1, 32)), il.const(1, 32))
+    lo_expr = mult_expr
     hi_expr = il.arith_shift_right(8, mult_expr, il.const(1, 32))
 
-    if instruction.reg1 != ZERO_REG:
-        il.append(il.set_reg(8, instruction.reg1, lo_expr))
     il.append(il.set_reg(8, LO_REG, lo_expr))
+    il.append(il.set_reg(8, LO_REG, il.sign_extend(8, il.reg(4, LO_REG))))
     il.append(il.set_reg(8, HI_REG, hi_expr))
+    if instruction.reg1 != ZERO_REG:
+        il.append(il.set_reg(8, instruction.reg1, lo_expr)) # R5900 also allows for a destination register for this opcode
+        il.append(il.set_reg(8, instruction.reg1, il.sign_extend(8, il.reg(4, instruction.reg1))))
 
 def multu1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     sreg1 = il.reg(4, instruction.reg2)
     sreg2 = il.reg(4, instruction.reg3)
 
     mult_expr = il.mult_double_prec_unsigned(4, sreg1, sreg2)
-    lo_expr = il.arith_shift_right(8, il.shift_left(8, mult_expr, il.const(1, 32)), il.const(1, 32))
+    lo_expr = mult_expr
     hi_expr = il.arith_shift_right(8, mult_expr, il.const(1, 32))
 
-    if instruction.reg1 != ZERO_REG:
-        il.append(il.set_reg(8, instruction.reg1, lo_expr))
     il.append(il.set_reg(8, LO1_REG, lo_expr))
+    il.append(il.set_reg(8, LO1_REG, il.sign_extend(8, il.reg(4, LO1_REG))))
     il.append(il.set_reg(8, HI1_REG, hi_expr))
+    if instruction.reg1 != ZERO_REG:
+        il.append(il.set_reg(8, instruction.reg1, lo_expr)) # R5900 also allows for a destination register for this opcode
+        il.append(il.set_reg(8, instruction.reg1, il.sign_extend(8, il.reg(4, instruction.reg1))))
 
 def nop(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.nop())
