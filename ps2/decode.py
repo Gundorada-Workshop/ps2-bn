@@ -9,7 +9,6 @@ from .cop0.registers import get_name as cop0_get_name
 from .fpu.registers import get_c_name as fpu_get_c_name
 from .vu0.registers import get_c_name as vu0f_get_c_name
 from .vu0.decode import decode_cop2_special
-from .cop0.registers import get_c_name as cop0_get_c_name
 from .instruction import Instruction, InstructionType
 
 def sign_extend_16_bit(i: int):
@@ -114,24 +113,28 @@ def decode_cop(opcode: int, addr: int) -> Instruction:
             # mfc0
             instruction.type = IT.GenericInt
             instruction.name = "mfc0"
+            instruction.il_func = ee_func.mfc0
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = cop0_get_name((opcode >> 11) & 0x1F)
         case 0x100:
             # mfc1
             instruction.type = IT.GenericInt
             instruction.name = "mfc1"
+            instruction.il_func = ee_func.mfc1
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
         case 0x004:
             # mtc0
             instruction.type = IT.GenericInt
             instruction.name = "mtc0"
+            instruction.il_func = ee_func.mtc0
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = cop0_get_name((opcode >> 11) & 0x1F)
         case 0x104:
             # mtc1
             instruction.type = IT.GenericInt
             instruction.name = "mtc1"
+            instruction.il_func = ee_func.mtc1
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = fpu_get_name((opcode >> 11) & 0x1F)
         case 0x010:
@@ -217,12 +220,14 @@ def decode_cop(opcode: int, addr: int) -> Instruction:
             # qmfc2
             instruction.type = IT.GenericInt
             instruction.name = "qmfc2"
+            instruction.il_func = ee_func.qmfc2
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = vu0f_get_name((opcode >> 11) & 0x1F)
         case 0x205:
             # qmtc2
             instruction.type = IT.GenericInt
             instruction.name = "qmtc2"
+            instruction.il_func = ee_func.qmtc2
             instruction.reg1 = ee_get_name((opcode >> 16) & 0x1F)
             instruction.reg2 = vu0f_get_name((opcode >> 11) & 0x1F)
 

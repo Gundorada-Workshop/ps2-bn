@@ -2,6 +2,7 @@ from __future__ import annotations
 from enum import Enum, auto, unique
 from typing import Optional, Callable, Type, Union, TYPE_CHECKING
 from binaryninja.architecture import RegisterName
+from binaryninja.lowlevelil import LowLevelILFunction
 
 if TYPE_CHECKING:
     from ..Arch import EmotionEngine
@@ -27,7 +28,7 @@ class Instruction:
     reg2: Optional[RegisterName]
     reg3: Optional[RegisterName]
     operand: Optional[Union[int, float]]
-    il_func: Optional[Callable]
+    il_func: Optional[Callable[[Instruction, int, LowLevelILFunction], None]]
     arch: Optional[Type[EmotionEngine]]
     cop_branch_type: Optional[bool]
     """

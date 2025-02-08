@@ -293,6 +293,16 @@ def lui(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.const(4, instruction.operand << 16)
     il.append(il.set_reg(4, instruction.reg1, val))
 
+def _mfc(instruction: Instruction, addr: int, il: 'LowLevelILFunction', cop_id: int) -> None:
+    size = 16 if cop_id == 2 else 4
+    il.append(il.set_reg(size, instruction.reg1, il.reg(size, instruction.reg2)))
+
+def mfc0(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _mfc(instruction, addr, il, 0)
+
+def mfc1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _mfc(instruction, addr, il, 1)
+
 def mfhi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.set_reg(8, instruction.reg1, il.reg(8, HI_REG)))
 
@@ -304,6 +314,16 @@ def mflo(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 
 def mflo1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.set_reg(8, instruction.reg1, il.reg(8, LO1_REG)))
+
+def _mtc(instruction: Instruction, addr: int, il: 'LowLevelILFunction', cop_id: int) -> None:
+    size = 16 if cop_id == 2 else 4
+    il.append(il.set_reg(size, instruction.reg2, il.reg(size, instruction.reg1)))
+
+def mtc0(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _mtc(instruction, addr, il, 0)
+
+def mtc1(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _mtc(instruction, addr, il, 1)
 
 def mthi(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.set_reg(8, HI_REG, il.reg(8, instruction.reg1)))
@@ -427,6 +447,12 @@ def ori(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
         expr = imm
 
     il.append(il.set_reg(4, instruction.reg1, expr))
+
+def qmfc2(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _mfc(instruction, addr, il, 2)
+
+def qmtc2(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
+    _mtc(instruction, addr, il, 2)
 
 def _sll(instruction: Instruction, addr: int, il: LowLevelILFunction, size: int, shift: ExpressionIndex) -> None:
     val = il.shift_left(size, il.reg(size, instruction.reg2), shift)
