@@ -278,14 +278,16 @@ def _load(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: i
     reg_size = max(8, size)
     il.append(il.set_reg(reg_size, instruction.reg1, value))
 
-lb  = lambda instruction, addr, il: _load(instruction, addr, il, 1, sign_extend=True)
-lbu = lambda instruction, addr, il: _load(instruction, addr, il, 1, sign_extend=False)
-ld  = lambda instruction, addr, il: _load(instruction, addr, il, 8, sign_extend=False)
-lh  = lambda instruction, addr, il: _load(instruction, addr, il, 2, sign_extend=True)
-lhu = lambda instruction, addr, il: _load(instruction, addr, il, 2, sign_extend=False)
-lq  = lambda instruction, addr, il: _load(instruction, addr, il, 16, sign_extend=False)
-lw  = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=True)
-lwu = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=False)
+lb   = lambda instruction, addr, il: _load(instruction, addr, il, 1, sign_extend=True)
+lbu  = lambda instruction, addr, il: _load(instruction, addr, il, 1, sign_extend=False)
+ld   = lambda instruction, addr, il: _load(instruction, addr, il, 8, sign_extend=False)
+lh   = lambda instruction, addr, il: _load(instruction, addr, il, 2, sign_extend=True)
+lhu  = lambda instruction, addr, il: _load(instruction, addr, il, 2, sign_extend=False)
+lq   = lambda instruction, addr, il: _load(instruction, addr, il, 16, sign_extend=False)
+lqc2 = lambda instruction, addr, il: _load(instruction, addr, il, 16, sign_extend=False)
+lw   = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=True)
+lwu  = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=False)
+lwc1 = lambda instruction, addr, il: _load(instruction, addr, il, 4, sign_extend=True)
 
 def lui(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.const(4, instruction.operand << 16)
@@ -509,11 +511,13 @@ def _store(instruction: Instruction, addr: int, il: 'LowLevelILFunction', size: 
     
     il.append(il.store(size, addr, value))
 
-sb  = lambda instruction, addr, il: _store(instruction, addr, il, 1)
-sd  = lambda instruction, addr, il: _store(instruction, addr, il, 8)
-sh  = lambda instruction, addr, il: _store(instruction, addr, il, 2)
-sq  = lambda instruction, addr, il: _store(instruction, addr, il, 16)
-sw  = lambda instruction, addr, il: _store(instruction, addr, il, 4)
+sb   = lambda instruction, addr, il: _store(instruction, addr, il, 1)
+sd   = lambda instruction, addr, il: _store(instruction, addr, il, 8)
+sh   = lambda instruction, addr, il: _store(instruction, addr, il, 2)
+sq   = lambda instruction, addr, il: _store(instruction, addr, il, 16)
+sqc2 = lambda instruction, addr, il: _store(instruction, addr, il, 16)
+sw   = lambda instruction, addr, il: _store(instruction, addr, il, 4)
+swc1 = lambda instruction, addr, il: _store(instruction, addr, il, 4)
 
 def syscall(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.system_call())
