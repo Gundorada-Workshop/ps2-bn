@@ -134,7 +134,7 @@ def beq(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     if r1 == ZERO_REG and r2 == ZERO_REG:
         return _unconditional_branch(instruction, addr, il)
 
-    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il))
+    _branch(instruction, addr, il)
 
 beql = beq
 bgez = _branch
