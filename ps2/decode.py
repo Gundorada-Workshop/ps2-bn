@@ -378,22 +378,26 @@ def decode_cop_s(opcode: int, addr: int) -> Instruction:
             # c.f.s
             instruction.type = IT.GenericInt
             instruction.name = "c.f.s"
+            instruction.il_func = fpu_func.c_f_s
         case 0x32:
             # c.eq.s
             instruction.type = IT.GenericInt
             instruction.name = "c.eq.s"
+            instruction.il_func = fpu_func.c_eq_s
             instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
         case 0x34:
             # c.lt.s
             instruction.type = IT.GenericInt
             instruction.name = "c.lt.s"
+            instruction.il_func = fpu_func.c_lt_s
             instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
         case 0x36:
             # c.eq.s
             instruction.type = IT.GenericInt
             instruction.name = "c.le.s"
+            instruction.il_func = fpu_func.c_le_s
             instruction.reg1 = fpu_get_name((opcode >> 11) & 0x1F)
             instruction.reg2 = fpu_get_name((opcode >> 16) & 0x1F)
 
