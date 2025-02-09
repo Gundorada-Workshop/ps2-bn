@@ -198,6 +198,7 @@ def decode_cop(opcode: int, addr: int) -> Instruction:
             # bc1
             instruction.type = IT.Branch
             instruction.name = "bc1"
+            instruction.il_func = fpu_func.bc1
             instruction.branch_dest = get_branch_dest(opcode, addr)
             instruction.cop_branch_type = bool((opcode >> 16) & 1)
             instruction.is_likely = bool((opcode >> 17) & 1)

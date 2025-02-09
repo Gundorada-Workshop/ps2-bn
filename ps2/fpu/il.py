@@ -1,5 +1,6 @@
 from ..instruction import Instruction
 from .registers import CONDITION_REG
+from ..ee.il import _branch
 from binaryninja.lowlevelil import LowLevelILFunction, LowLevelILLabel
 
 def fpu_abs(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
@@ -11,6 +12,8 @@ def add(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
     expr = il.float_add(4, il.reg(4, instruction.reg2), il.reg(4, instruction.reg3))
     expr = il.set_reg(4, instruction.reg1, expr)
     il.append(expr)
+
+bc1 = _branch
 
 def c_s(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     cond = get_compare_cond_expr(instruction, addr, il)

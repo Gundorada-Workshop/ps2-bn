@@ -1,5 +1,6 @@
 from .registers import registers as gpr
 from .registers import ZERO_REG, LO_REG, HI_REG, LO1_REG, HI1_REG, SP_REG
+from ..fpu.registers import CONDITION_REG as FPU_CONDITION_REG
 from ..instruction import Instruction
 from ..intrinsics import PS2Intrinsic
 from binaryninja.architecture import Architecture
@@ -86,9 +87,11 @@ def _unconditional_branch(instruction: Instruction, addr: int, il: 'LowLevelILFu
 def _unconditional_failed_branch(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     il.append(il.nop())
 
-def _branch(instruction: Instruction, addr: int, il: 'LowLevelILFunction', cond: ExpressionIndex, true_jump_fn = None) -> None:
+def _branch(instruction: Instruction, addr: int, il: 'LowLevelILFunction', true_jump_fn = None) -> None:
     if true_jump_fn is None:
         true_jump_fn = il.jump
+
+    cond = get_branch_cond_expr(instruction, addr, il)
 
     # Adapted from NES example, gotta figure out what indirect is used for later on
     t = None
@@ -134,27 +137,19 @@ def beq(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il))
 
 beql = beq
-
-def bgez(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
-    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il))
+bgez = _branch
 bgezl = bgez
 def bgezal(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
-    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il), true_jump_fn=il.call)
+    _branch(instruction, addr, il, true_jump_fn=il.call)
 bgezall = bgezal
-
-def bgtz(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
-    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il))
+bgtz = _branch
 bgtzl = bgtz
-
-def blez(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
-    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il))
+blez = _branch
 blezl = blez
-
-def bltz(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
-    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il))
+bltz = _branch
 bltzl = bltz
 def bltzal(instruction: Instruction, addr: int, il: LowLevelILFunction) -> None:
-    _branch(instruction, addr, il, get_branch_cond_expr(instruction, addr, il), true_jump_fn=il.call)
+    _branch(instruction, addr, il, true_jump_fn=il.call)
 bltzall = bltzal
 
 
@@ -680,21 +675,25 @@ def get_branch_cond_expr(instruction: Instruction, addr: int, il: 'LowLevelILFun
     r1 = instruction.reg1
     r2 = instruction.reg2
     
-    if r1 == ZERO_REG:
-        val1 = il.const(8, 0)
-    else:
-        val1 = il.reg(8, instruction.reg1)
+    val1 = None
+    if r1 is not None:
+        if r1 == ZERO_REG:
+            val1 = il.const(8, 0)
+        else:
+            val1 = il.reg(8, instruction.reg1)
 
-    if r2 == ZERO_REG or r2 is None:
-        val2 = il.const(8, 0)
-    else:
-        val2 = il.reg(8, instruction.reg2)
+    val2 = None
+    if r2 is not None:
+        if r2 == ZERO_REG:
+            val2 = il.const(8, 0)
+        else:
+            val2 = il.reg(8, instruction.reg2)
 
     match instruction.name:
         case "bc0":
             return il.unimplemented()
         case "bc1":
-            return il.unimplemented()
+            return il.compare_equal(3, il.reg(3, FPU_CONDITION_REG), il.const(3, instruction.cop_branch_type))
         case "bc2":
             return il.unimplemented()
         case "beq" | "beql":
