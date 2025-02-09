@@ -18,6 +18,7 @@ from .ps2.vu0.registers import f_registers as VU0FRegisters
 from .ps2.vu0.registers import c_registers as VU0CRegisters
 from .ps2.vu0.decode import component_bits_to_string, component_id_to_string
 from .ps2.cop0.registers import registers as COP0Registers
+from .ps2.fpu.registers import CONDITION_FLAG as FPU_CONDITION_FLAG
 from .ps2.intrinsics import PS2Intrinsic
 from binaryninja import lowlevelil, IntrinsicInfo, Type
 from binaryninja.architecture import Architecture
@@ -46,6 +47,7 @@ class EmotionEngine(Architecture):
     WANT_PSEUDO_OP = True
 
     regs = EERegisters | COP0Registers | FPURegisters | FPUCRegisters | VU0IRegisters | VU0FRegisters | VU0CRegisters
+    flags = [FPU_CONDITION_FLAG]
     intrinsics = {
         PS2Intrinsic.DI: IntrinsicInfo([],  []),
         PS2Intrinsic.EI: IntrinsicInfo([],  []),

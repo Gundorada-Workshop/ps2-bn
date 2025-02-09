@@ -1,6 +1,6 @@
 from .registers import registers as gpr
 from .registers import ZERO_REG, LO_REG, HI_REG, LO1_REG, HI1_REG, SP_REG
-from ..fpu.registers import CONDITION_REG as FPU_CONDITION_REG
+from ..fpu.registers import CONDITION_FLAG as FPU_CONDITION_FLAG
 from ..instruction import Instruction
 from ..intrinsics import PS2Intrinsic
 from binaryninja.architecture import Architecture
@@ -693,7 +693,7 @@ def get_branch_cond_expr(instruction: Instruction, addr: int, il: 'LowLevelILFun
         case "bc0":
             return il.unimplemented()
         case "bc1":
-            return il.compare_equal(3, il.reg(3, FPU_CONDITION_REG), il.const(3, instruction.cop_branch_type))
+            return il.compare_equal(3, il.flag(FPU_CONDITION_FLAG), il.const(3, instruction.cop_branch_type))
         case "bc2":
             return il.unimplemented()
         case "beq" | "beql":

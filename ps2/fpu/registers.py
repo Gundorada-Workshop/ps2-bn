@@ -1,4 +1,4 @@
-from binaryninja.architecture import RegisterName, RegisterInfo
+from binaryninja.architecture import RegisterName, RegisterInfo, FlagName
 from typing import Dict, List, Tuple
 
 F0_REG = RegisterName("$f0")
@@ -24,12 +24,10 @@ def get_name(index: int) -> RegisterName:
 # name, size
 # TODO
 c_register_names = [f"$FPUCR{i}" for i in range(32)]
-CONDITION_REG = RegisterName("FCSR")
-c_register_names[31] = CONDITION_REG
-
 c_registers: Dict[RegisterName, RegisterInfo] = {
     name: RegisterInfo(name, 4) for name in c_register_names
 }
+CONDITION_FLAG = FlagName("FCSR")
 
 def get_c_name(index: int) -> RegisterName:
     if not 0 <= index < 32:

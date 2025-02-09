@@ -1,5 +1,5 @@
 from ..instruction import Instruction
-from .registers import CONDITION_REG
+from .registers import CONDITION_FLAG
 from ..ee.il import _branch
 from binaryninja.lowlevelil import LowLevelILFunction, LowLevelILLabel
 
@@ -23,10 +23,10 @@ def c_s(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
 
     il.append(il.if_expr(cond, t, f))
     il.mark_label(t)
-    il.append(il.set_reg(3, CONDITION_REG, il.const(3, 1)))
+    il.append(il.set_flag(CONDITION_FLAG, il.const(3, 1)))
     il.append(il.goto(done))
     il.mark_label(f)
-    il.append(il.set_reg(3, CONDITION_REG, il.const(3, 0)))
+    il.append(il.set_flag(CONDITION_FLAG, il.const(3, 0)))
     il.mark_label(done)
 
 c_f_s = c_s
