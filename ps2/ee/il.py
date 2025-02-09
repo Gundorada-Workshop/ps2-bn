@@ -4,7 +4,10 @@ from ..fpu.registers import CONDITION_FLAG as FPU_CONDITION_FLAG
 from ..instruction import Instruction
 from ..intrinsics import PS2Intrinsic
 from binaryninja.architecture import Architecture
-from binaryninja.lowlevelil import LowLevelILFunction, LowLevelILLabel, LowLevelILInstruction, ExpressionIndex, LowLevelILConst
+from binaryninja.lowlevelil import LowLevelILFunction, LowLevelILLabel, LowLevelILInstruction, ExpressionIndex, LowLevelILConst, LowLevelILOperation
+
+def _bool_to_int(il: LowLevelILFunction, size: int, expr: ExpressionIndex) -> None:
+    return il.expr(LowLevelILOperation.LLIL_BOOL_TO_INT, expr, size=size)
 
 def add(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     _add(instruction, addr, il, 4)
@@ -512,6 +515,7 @@ def slt(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.reg(8, instruction.reg3)
     source = il.reg(8, instruction.reg2)
     expr = il.compare_signed_less_than(8, source, val)
+    expr = _bool_to_int(il, 8, expr)
 
     il.append(il.set_reg(8, instruction.reg1, expr))
 
@@ -519,6 +523,7 @@ def slti(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.const(8, instruction.operand)
     source = il.reg(8, instruction.reg2)
     expr = il.compare_signed_less_than(8, source, val)
+    expr = _bool_to_int(il, 8, expr)
 
     il.append(il.set_reg(8, instruction.reg1, expr))
 
@@ -526,6 +531,7 @@ def sltiu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None
     val = il.const(8, instruction.operand)
     source = il.reg(8, instruction.reg2)
     expr = il.compare_unsigned_less_than(8, source, val)
+    expr = _bool_to_int(il, 8, expr)
 
     il.append(il.set_reg(8, instruction.reg1, expr))
 
@@ -533,6 +539,7 @@ def sltu(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     val = il.reg(8, instruction.reg3)
     source = il.reg(8, instruction.reg2)
     expr = il.compare_unsigned_less_than(8, source, val)
+    expr = _bool_to_int(il, 8, expr)
 
     il.append(il.set_reg(8, instruction.reg1, expr))
 
