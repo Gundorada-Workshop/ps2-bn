@@ -383,9 +383,9 @@ def mult(instruction: Instruction, addr: int, il: 'LowLevelILFunction') -> None:
     lo_expr = mult_expr
     hi_expr = il.arith_shift_right(8, mult_expr, il.const(1, 32))
 
-    il.append(il.set_reg(8, LO1_REG, lo_expr))
-    il.append(il.set_reg(8, LO1_REG, il.sign_extend(8, il.reg(4, LO1_REG))))
-    il.append(il.set_reg(8, HI1_REG, hi_expr))
+    il.append(il.set_reg(8, LO_REG, lo_expr))
+    il.append(il.set_reg(8, LO_REG, il.sign_extend(8, il.reg(4, LO_REG))))
+    il.append(il.set_reg(8, HI_REG, hi_expr))
     if instruction.reg1 != ZERO_REG:
         il.append(il.set_reg(8, instruction.reg1, lo_expr)) # R5900 also allows for a destination register for this opcode
         il.append(il.set_reg(8, instruction.reg1, il.sign_extend(8, il.reg(4, instruction.reg1))))
